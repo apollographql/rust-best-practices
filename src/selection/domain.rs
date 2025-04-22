@@ -59,6 +59,20 @@ pub enum MappingExpression {
     Nested {
         fields: Vec<FieldMapping>,
     },
+    AliasNested {
+        source: Name,
+        fields: Vec<FieldMapping>,
+    },
+}
+
+impl MappingExpression {
+    pub(crate) fn into_alias(self, source: Name) -> Self {
+        match self {
+            Self::Direct => Self::Alias(source),
+            Self::Nested { fields } => Self::AliasNested { source, fields },
+            others => others,
+        }
+    }
 }
 
 /// Functions that allow to transform data in response

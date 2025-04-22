@@ -149,6 +149,29 @@ fn mapping_expression(input: &mut &str) -> ParserResult<MappingExpression> {
     .parse_next(input)
 }
 
+fn nested_mapping(input: &mut &str) -> ParserResult<FieldMapping> {
+    trace(
+        "nested_mapping",
+        (
+            ignore_whitespace(identifier),
+            preceded(ignore_whitespace(literal(":")), nested_values),
+        ),
+    )
+    .map(|(field_name, field_mapping)| FieldMapping {
+        field_name: Name::new(&field_name)
+            .unwrap_or_else(|err| panic!("Invalid field name: `{field_name}`: {err}")),
+        expression: field_mapping.expression.into_alias(
+            Name::new(&field_mapping.field_name).unwrap_or_else(|err| {
+                panic!(
+                    "Invalid alias field mapping: `{}`: {err}",
+                    field_mapping.field_name
+                )
+            }),
+        ),
+    })
+    .parse_next(input)
+}
+
 fn field_mapping(input: &mut &str) -> ParserResult<FieldMapping> {
     trace(
         "field_mapping",
@@ -206,7 +229,11 @@ fn nested_values(input: &mut &str) -> ParserResult<FieldMapping> {
 pub fn selection_parser(input: &mut &str) -> ParserResult<Vec<FieldMapping>> {
     separated(
         0..,
-        alt((ignore_whitespace(nested_values), field_mapping)),
+        alt((
+            ignore_whitespace(nested_values),
+            nested_mapping,
+            field_mapping,
+        )),
         alt((line_ending, literal(','), literal(';'))),
     )
     .parse_next(input)
@@ -513,6 +540,37 @@ status: status->match(@ => {
                                     },
                                 ]
                             },
+                        },
+                    ]
+                }
+            }]
+        );
+    }
+
+    #[test]
+    fn alias_nested_values() {
+        let mut input = "
+        data: variants {
+          name,
+          price     
+        }";
+
+        let result = selection_parser(&mut input).unwrap();
+
+        assert_eq!(
+            result,
+            vec![FieldMapping {
+                field_name: Name::new_static_unchecked("data"),
+                expression: MappingExpression::AliasNested {
+                    source: Name::new_static_unchecked("variants"),
+                    fields: vec![
+                        FieldMapping {
+                            field_name: Name::new_static_unchecked("name"),
+                            expression: MappingExpression::Direct,
+                        },
+                        FieldMapping {
+                            field_name: Name::new_static_unchecked("price"),
+                            expression: MappingExpression::Direct,
                         },
                     ]
                 }
