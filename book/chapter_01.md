@@ -75,26 +75,31 @@ let new_num = increment(num); // `num` still usable after this point
 For reference, each primitive type size in bytes:
 
 #### Integers:
-| type | Size |
-| —----| —----|	
-| i8/u8	      | 1 byte   |
-| i16/u16	  | 2 bytes  |	
-| i32/u32	  | 4 bytes  |
-| i64/u64	  | 8 bytes  |
-| isize/usize | Arch     |
-| i128/u128	  | 16 bytes |
 
-Floating Point:
-| type | Size |
-| —----| —----|	
-| f32  | 4 bytes |
-| f64  | 8 bytes |
+| Type        	| Size     	|
+|-------------	|----------	|
+|    i8 u8    	|  1 byte  	|
+| i16 u16     	| 2 bytes  	|
+| i32 u32     	| 4 bytes  	|
+| i64 u64     	| 8 bytes  	|
+| isize usize 	| Arch     	|
+| i128 u128   	| 16 bytes 	|
 
-Other:
-| type | Size |
-| —----| —----|	
-| bool | 1 byte  |
-| char | 4 bytes |
+#### Floating Point:
+
+| Type     	| Size     	|
+|----------	|----------	|
+| f32     	| 4 bytes  	|
+| f64     	| 8 bytes  	|
+
+
+#### Other:
+
+| Type     	| Size     	|
+|----------	|----------	|
+| bool     	| 1 byte  	|
+| char     	| 4 bytes  	|
+
 
 ### ✅Good struct to derive `Copy`:
 ```rust
