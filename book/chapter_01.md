@@ -4,7 +4,7 @@
 
 Rust’s ownership system encourages **borrow** (`&T`) instead of **cloning** (`T.clone()`). 
 
-### ✅ Cloning- when:
+### ✅ When to `Clone`:
 
 * You need to change the object AND preserve the original object (immutable snapshots).
 * When you have `Arc` or `Rc` pointers.
@@ -51,7 +51,7 @@ process(user.clone()); // Unnecessary clone
 
 Not all types should be passed by reference (`&T`). If a type is **small** and it is **cheap to copy**, it is often better to **pass it by value**. Rust makes it explicit via the `Copy` trait.
 
-### ✅Pass by value - when:
+### ✅ When to pass by value, `Copy`:
 * The type **implements** `Copy` (`u32`, `bool`, `f32`, small structs).
 * The cost of moving the value is negligible.
 
