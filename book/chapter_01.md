@@ -3,6 +3,7 @@
 ## 1.1 Borrowing Over Cloning
 
 Rust’s ownership system encourages **borrow** (`&T`) instead of **cloning** (`T.clone()`). 
+> ❗ Performance recommendation
 
 ### ✅ When to `Clone`:
 
@@ -10,7 +11,7 @@ Rust’s ownership system encourages **borrow** (`&T`) instead of **cloning** (`
 * When you have `Arc` or `Rc` pointers.
 * When data is shared across threads, usually `Arc`.
 * Avoid massive refactoring of non performance critical code.
-* When caching results:
+* When caching results (duumy example below):
 ```rust
 fn get_config(&self) -> Config {
   self.cached_config.clone()
@@ -26,6 +27,12 @@ fn get_config(&self) -> Config {
 * Prefer `&[T]` instead of `Vec<T>` or even `&Vec<T>`.
 * Prefer `&str` or `&String` instead of `String`.
 * Prefer `&T` instead of `T`.
+* Clone a reference argument, if you need ownership, make it explicit in the arguments for the caller. Example:
+```rust
+fn take_a_borrow(thing: &Thing) {
+  let thing_cloned = thing.clone(); // the caller should have passed ownership instead
+}
+```
 
 ### ✅ Prefer borrowing:
 ```rust
@@ -315,14 +322,22 @@ for value in &mut value {
 * You can **compose multiple steps** elegantly.
 * No need for early exits.
 * You need support for indexed values with `.enumerate`.
-* You need to use collections functions like `.windows` or `chunks`.
-
 ```rust
 let values: Vec<_> = vec.into_iter()
     .enumerate()
     .filter(|(_index, value)| value % 2 == 0)
     .map(|(index, value)| value % index)
     .collect()
+```
+* You need to use collections functions like `.windows` or `chunks`.
+* You need to combine data from multiple sources and don't want to allocate multiple collections.
+* Iterators can be combined with `for` loops:
+```rust
+for value in vec.iter().enumerate()
+    .filter(|(index, value)| value % index == 0) {
+    // ...
+}
+    
 ```
 
 > #### ❗REMEMBER: Iterators are Lazy
@@ -334,6 +349,7 @@ let values: Vec<_> = vec.into_iter()
 
 * Don't chain without formatting. Prefer each chainned function on its own line with the correct indentation (`rustfmt` should take care of this).
 * Don't chain if it makes the code unreadable.
+* Avoid needlessly collect/allocate of a collection (e.g. vector) just to throw it away later by some larger operation or by another iteration.
 * Prefer `iter` over `into_iter` unless you don't need the ownership of the collection.
 * Prefer `iter` over `into_iter` for collections that inner type implements `Copy`, e.g. `Vec<T: Copy>`.
 * For summing numbers prefer `.sum` over `.fold`. `.sum` is specialized for summing values, so the compiler knows it can make optimizations on that front, while fold has a blackbox closure that needs to be applied at every step. If you need to sum by an initial value, just added in the expression.
@@ -386,6 +402,7 @@ let connector_tls_root_store: RootCertStore = configuration
     .unwrap_or_else(crate::services::http::HttpClientService::native_roots_store);
 ```
 
+* ❗ More use cases to come in their appropriate sections.
 
 ### ❌ Bad comments
 
@@ -398,6 +415,7 @@ fn do_something_odd() {
   …
 }
 ```
+> Prefer `/// doc` comment if it's describing the function.
 
 * Comments that could be better represented as functions or are plain obvious
 ```rust

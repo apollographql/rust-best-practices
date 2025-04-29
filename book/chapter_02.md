@@ -21,7 +21,7 @@ Add the following to your daily workflow:
 $ cargo clippy --all-targets --all-feature --locked -- -D warnings
 ```
 
-* `-all-targets`: checks library, tests, benches and examples.
+* `--all-targets`: checks library, tests, benches and examples.
 * `--all-feature`: checks code for all features enabled, auto solves conflicting feaatures.
 * `--locked`: Requires `Cargo.lock` to be up-to-date, can be solved with `$ cargo update`.
 * `-D warnings`: treats warnings as errors
@@ -40,13 +40,14 @@ Potential aditions elements to add:
 
 | Lint Name | Why | Link |
 | --------- | ----| -----|
-| `redundant_clone` | Detects unnecessary `clones`, has performance impact | [link](https://rust-lang.github.io/rust-clippy/master/#/redundant_clone) |
-| `needless_borrow` group | Removes redundant `&` borrowing | [link](https://rust-lang.github.io/rust-clippy/master/#/needless_borrow) |
+| `redundant_clone` | Detects unnecessary `clones`, has performance impact | [link (nursery)](https://rust-lang.github.io/rust-clippy/master/#redundant_clone) |
+| `needless_borrow` group | Removes redundant `&` borrowing | [link (style)](https://rust-lang.github.io/rust-clippy/master/#needless_borrow) |
 | `map_unwrap_or` / `map_or` | Simplifies nested `Option/Result` handling | [`map_unwrap_or`](https://rust-lang.github.io/rust-clippy/master/#map_unwrap_or) [`unnecessary_map_or`](https://rust-lang.github.io/rust-clippy/master/#unnecessary_map_or) [`unnecessary_result_map_or_else`](https://rust-lang.github.io/rust-clippy/master/#unnecessary_result_map_or_else) |
-| `manual_ok_or` | Suggest using `.ok_or_else` insteadh o `match` | [link](https://rust-lang.github.io/rust-clippy/master/#manual_ok_or) |
-| `large_enum_variant` | Warns if an enum has very large variant which is bad for memory. Suggests `Boxing` it | [link](https://rust-lang.github.io/rust-clippy/master/#large_enum_variant) |
-| `unnecessary_wraps` | If your function always returns `Some` or `Ok`, you don't need `Option`/`Result` | [link](https://rust-lang.github.io/rust-clippy/master/#/unnecessary_wraps) |
-| `clone_on_copy` | Catches accodental `.clone()` on `Copy` types like `u32` and `bool` | [link](https://rust-lang.github.io/rust-clippy/master/#/clone_on_copy) |
+| `manual_ok_or` | Suggest using `.ok_or_else` insteadh o `match` | [link (style)](https://rust-lang.github.io/rust-clippy/master/#manual_ok_or) |
+| `large_enum_variant` | Warns if an enum has very large variant which is bad for memory. Suggests `Boxing` it | [link (perf)](https://rust-lang.github.io/rust-clippy/master/#large_enum_variant) |
+| `unnecessary_wraps` | If your function always returns `Some` or `Ok`, you don't need `Option`/`Result` | [link (pedantic)](https://rust-lang.github.io/rust-clippy/master/#unnecessary_wraps) |
+| `clone_on_copy` | Catches accodental `.clone()` on `Copy` types like `u32` and `bool` | [link (complexity)](https://rust-lang.github.io/rust-clippy/master/#clone_on_copy) |
+| `needless_collect` | Prevents collecting and allocating an iterator, when allocation is not needed | [link (nursery)](https://rust-lang.github.io/rust-clippy/master/#needless_collect) |
 
 ## 2.4 Fix warnings, don't silence them!
 
