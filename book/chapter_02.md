@@ -29,7 +29,7 @@ $ cargo clippy --all-targets --all-feature --locked -- -D warnings
 Potential aditions elements to add:
 
 * `-- -W clippy::pedantic`: lints which are rather strict or have occasional false positives.
-* `-- -W clippy::nursery`: Opyionally can be added to check for new lints that are still under development.
+* `-- -W clippy::nursery`: Optionally can be added to check for new lints that are still under development.
 * ❗ Add this to your Makefile, Justfile, xtask or CI Pipeline.
 
 > Example at ApolloGraphQL
