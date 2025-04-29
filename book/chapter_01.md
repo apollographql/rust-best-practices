@@ -296,7 +296,7 @@ Y * (THREE_HALVES - (number * 0.5 * y * y))
 ```rust
 // Lorem Ipsum is simply dummy text of the printing and typesetting industry. 
 // Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, 
-/// when an unknown printer took a galley
+// when an unknown printer took a galley
 fn do_something_odd() {
   …
 }
@@ -309,6 +309,8 @@ fn computation() {
   i += 1;
 }
 ```
+
+> Doc-comments and Doc-testing, `///` and `//!` in [chapter 12](./chapter_12.md)
 
 ## 1.6 Iterator, `.iter` vs `for`
 
