@@ -23,7 +23,7 @@ fn get_config(&self) -> Config {
 * Auto-cloning inside loops `.map(|x| x.clone)`, prefer to call `.cloned()` or `.copied()` at the end of the iterator.
 * Cloning large data structures like `Vec<T>` or `HashMap<K, V>`.
 * Clone because of bad API design instead of adjusting lifetimes.
-* Prefer `&[T}` instead of `Vec<T>` or even `&Vec<T>`.
+* Prefer `&[T]` instead of `Vec<T>` or even `&Vec<T>`.
 * Prefer `&str` or `&String` instead of `String`.
 * Prefer `&T` instead of `T`.
 
