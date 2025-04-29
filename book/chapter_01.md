@@ -197,7 +197,7 @@ if let Some(x) = self.next() {
 
 ### ❌ Bad Option/Return pattern matching:
 
-* Conversion between Result and Option (prefer `.ok()` and `.ok_or()`)
+* Conversion between Result and Option (prefer `.ok()`,`.ok_or()`, and `ok_or_else()`)
 ```rust
 match self {
   Ok(t) => Some(t),
