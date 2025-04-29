@@ -270,49 +270,7 @@ x
 .map_err(|err| GeneralError::from(("function_name", err)))?;
 ```
 
-## 1.5 Comments
-Excessive comments are usually code smells, breaking it into smaller, more testable, functions with good names could improve the general developer experience. Comments are recommended when you do non-standard stuff or you have explicit checks/overrides:
-
-### ✅ Good comments 
-```rust
-// SAFETY: We have checked that the pointer is valid and non-null. @Function xyz.
-unsafe { std::ptr::copy_nonoverlapping(src, dst, len); }
-```
-
-```rust
-// This algorithm is a fast square root approximation
-const THREE_HALVES: f32 = 1.5;
-fn q_rsqrt(number: f32 ) -> f32 {
-	let mut i: i32 = number.to_bits() as i32;
-I = 0x5F375A86_i32.wrapping_sub(i >> 1);
-let y: f32::from_bits(i as u32);
-Y * (THREE_HALVES - (number * 0.5 * y * y))
-}
-```
-
-### ❌ Bad comments
-
-* Long comments and multiline comments
-```rust
-// Lorem Ipsum is simply dummy text of the printing and typesetting industry. 
-// Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, 
-// when an unknown printer took a galley
-fn do_something_odd() {
-  …
-}
-```
-
-* Comments that could be better represented as functions or are plain obvious
-```rust
-fn computation() {
-  // increment i by 1
-  i += 1;
-}
-```
-
-> Doc-comments and Doc-testing, `///` and `//!` in [chapter 12](./chapter_12.md)
-
-## 1.6 Iterator, `.iter` vs `for`
+## 1.5 Iterator, `.iter` vs `for`
 
 First we need to understand a basic loop with each one of them. Let's consider the following problem, we need to sum all even numbers between 0 and 10 incremented by 1:
 
@@ -379,3 +337,147 @@ let values: Vec<_> = vec.into_iter()
 * Prefer `iter` over `into_iter` unless you don't need the ownership of the collection.
 * Prefer `iter` over `into_iter` for collections that inner type implements `Copy`, e.g. `Vec<T: Copy>`.
 * For summing numbers prefer `.sum` over `.fold`. `.sum` is specialized for summing values, so the compiler knows it can make optimizations on that front, while fold has a blackbox closure that needs to be applied at every step. If you need to sum by an initial value, just added in the expression.
+
+## 1.6 Comments: Context, not Clutter
+
+> "Context are for why, not what or how"
+
+Well-written Rust code, with expressive tyoes and good naming, often speaks for itself. Many high-quality codebases thrive on **few or no comments**. And that's a good thing.
+
+Still, there are **moments where code alone isn't enough** - when there are performance quirks, external constraints, or non-obvious tradeoffs that require a nudge to the reader. In those cases, a concise comment can prevent hours of head-scratching or searching git history.
+
+### ✅ Good comments 
+
+* Safety concerns:
+```rust
+// SAFETY: We have checked that the pointer is valid and non-null. @Function xyz.
+unsafe { std::ptr::copy_nonoverlapping(src, dst, len); }
+```
+
+* Performance quirks:
+```rust
+// This algorithm is a fast square root approximation
+const THREE_HALVES: f32 = 1.5;
+fn q_rsqrt(number: f32 ) -> f32 {
+	let mut i: i32 = number.to_bits() as i32;
+I = 0x5F375A86_i32.wrapping_sub(i >> 1);
+let y: f32::from_bits(i as u32);
+Y * (THREE_HALVES - (number * 0.5 * y * y))
+}
+```
+
+* Clear code beats comments. However, when the why isn't obvious, say it plainly - or link to where:
+```rust
+// PERF: Generating the root store per subgraph caused high TLS startup latency on MacOS
+// This works as a caching alternative. See: [ADR-123](kink/to/adr-123)
+let subgraph_tls_root_store: RootCertStore = configuration
+    .tls
+    .subgraph
+    .all
+    .create_certificate_store()
+    .transpose()?
+    .unwrap_or_else(crate::services::http::HttpClientService::native_roots_store);
+let connector_tls_root_store: RootCertStore = configuration
+    .tls
+    .connector
+    .all
+    .create_certificate_store()
+    .transpose()?
+    .unwrap_or_else(crate::services::http::HttpClientService::native_roots_store);
+```
+
+
+### ❌ Bad comments
+
+* Wall-of-text explanations: long comments and multiline comments
+```rust
+// Lorem Ipsum is simply dummy text of the printing and typesetting industry. 
+// Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, 
+// when an unknown printer took a galley
+fn do_something_odd() {
+  …
+}
+```
+
+* Comments that could be better represented as functions or are plain obvious
+```rust
+fn computation() {
+  // increment i by 1
+  i += 1;
+}
+```
+
+### ✅ Breakung up long functions over commenting them
+
+If you find yourself writing a long comment explaining "what", "how" or "each step" in a function, it might be time to split it. So the suggestion is to refactor. This can be beneficial not only for readability, but testability:
+
+#### ❌ Instead of:
+```rust
+fn process_request(request: T) {
+    // We first need to validate request, because of corner case x, y, z
+    // As the payload can only be decoded when they are valid
+    // Then we can perform authorization on the payload
+    // lastly with the authorized payload we can dispatch to handler
+}
+```
+
+#### ✅ Prefer
+```rust
+fn process_request(request: T) -> Result<(), Error> {
+    validate_request_headers(&request)?;
+    let payload = decode_payload(&request);
+    authorize(&payload)?;
+    dispatch_to_handler(payload)
+}
+
+#[cfg(test)]
+mod tests {
+    #[test]
+    fn validate_request_happy_path() { ... }
+
+    #[test]
+    fn validate_request_fails_on_x() { ... }
+
+    #[test]
+    fn validate_request_fails_on_y() { ... }
+
+    #[test]
+    fn decode_validated_request() { ... }
+
+    #[test]
+    fn authrorize_payload_xyz() { ... }
+}
+```
+
+Let **structure** and **naming** replace commentary, and enhance its documentation with **tests as living documentation**.
+
+### 📝 TODOs are not comments - track them properly
+
+Avoid leaving lingering `// TODO: Lorem Ipsum` comments in the code. Instead:
+* Turn them into Jira or Github Issues.
+* If needed, to avoid future confusion, reference the issue in the code and the code in the issue.
+
+```rust
+// See issue #123: support hyper 2.0
+```
+
+This helps keeping the code clean and making sure tasks are not forgotten.
+
+### Comments as Living Documentation
+
+There are a few gotchas when calling comments "living documentation":
+* Code evolves.
+* Context changes.
+* Comments get stale.
+* Many large comments make people avoid reading them.
+* Team becomes fearful of delete irrelevant comments.
+
+If you find a comment, **don't trust it blindly**. Read it in context. If it's wrong or outdated, fix or remove it. A misleading comment is worse than no comments at all. 
+
+> Comments should bother you - they demand re-verification, just like stale tests.
+
+When deeper justification is needed, prefer to:
+* **Link to a Design Doc or an ADR**, business logic lives well in design docs while performance tradeoffs live well in ADRs.
+* Move runtime example and usage docs into Rust Docs, `/// doc comment`, where they can be tested and kept up-to-date by tools like `cargo doc`.
+
+> Doc-comments and Doc-testing, `///` and `//!` in [chapter 12](./chapter_12.md)
