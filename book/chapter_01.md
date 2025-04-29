@@ -372,7 +372,7 @@ let values: Vec<_> = vec.into_iter()
 
 ### 🚨 Anti-patterns to AVOID
 
-* Don't chain without formatting. Prefer each chainned function on its own line with the correct indentation.
+* Don't chain without formatting. Prefer each chainned function on its own line with the correct indentation (`rustfmt` should take care of this).
 * Don't chain if it makes the code unreadable.
 * Prefer `iter` over `into_iter` unless you don't need the ownership of the collection.
 * Prefer `iter` over `into_iter` for collections that inner type implements `Copy`, e.g. `Vec<T: Copy>`.

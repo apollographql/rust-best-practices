@@ -32,6 +32,10 @@ Potential aditions elements to add:
 * `-- -W clippy::nursery`: Opyionally can be added to check for new lints that are still under development.
 * ❗ Add this to your Makefile, Justfile, xtask or CI Pipeline.
 
+> Example at ApolloGraphQL
+>
+> In the `Router` project there is a `xtask` configured for linting that can be executed with `cargo xtask lint`. 
+
 ## 2.3 Important Clippy Lints to Respect
 
 | Lint Name | Why | Link |
