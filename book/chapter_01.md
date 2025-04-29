@@ -205,7 +205,7 @@ match self {
 }
 ```
 
-* `if let PATTERN = EXPRESSION else {  DIVERGING_CODE; }` when divergent code is a default or pre-computed value (prefer `et PATTERN = EXPRESSION else {  DIVERGING_CODE; }`):
+* `if let PATTERN = EXPRESSION else {  DIVERGING_CODE; }` when divergent code is a default or pre-computed value (prefer `let PATTERN = EXPRESSION else {  DIVERGING_CODE; }`):
 ```rust
 if let Some(values) = self.next() {
   // computation
