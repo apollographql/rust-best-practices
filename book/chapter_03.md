@@ -103,9 +103,9 @@ In sections [Borrowing over Cloning](./chapter_01.md#11-borrowing-over-cloning) 
     assert_eq!(Point { x: 1, y: 0 } + Point { x: 2, y: 3 },
             Point { x: 3, y: 3 });
     ```
-    * Need to do comparison snapshops or due to API you need multiple owned instaces of the data.
+    * Need to do comparison snapshops or due to API you need multiple owned instances of the data.
     ```rust
-    fn snapshop(a: &MyValue, b:&MyValue) -> MyValueDiff {
+    fn snapshot(a: &MyValue, b:&MyValue) -> MyValueDiff {
         a - b
     }
 
@@ -122,7 +122,7 @@ In sections [Borrowing over Cloning](./chapter_01.md#11-borrowing-over-cloning) 
         let b = a.clone();
 
         a.magical_update();
-        println!("{:?}", snapshop(&a, &b));
+        println!("{:?}", snapshot(&a, &b));
     }
     ```
 * You have reference counted pointers (`Arc, Rc`).
@@ -169,7 +169,7 @@ hello_greet(Cow::Owned("Naomi".to_string()));
 ### ✅ Good Practices 
 
 * Keep small types (`impl Copy`, `usize`, `bool`, etc) **on the stack**.
-* Avoid passing huge types (`> 512 bytes`)  by value or transfering ownership. Prefer pass by reference (e.g. `&T` and `&mut T`).
+* Avoid passing huge types (`> 512 bytes`)  by value or transferring ownership. Prefer pass by reference (e.g. `&T` and `&mut T`).
 * Heap allocate recursive datastructures:
 ```rust
 enum OctreeNode<T> {
@@ -181,7 +181,7 @@ enum OctreeNode<T> {
 
 ### ❗ Be Mindful
 
-* Only use `#[inline]` when benchmark proves benefitial, Rust is already preety good at inlining **without** hints.
+* Only use `#[inline]` when benchmark proves beneficial, Rust is already pretty good at inlining **without** hints.
 * Avoid massive stack allocations, box them `let buffer: Box<[u8; 65536]> = Box::new(..)`.
 
 ## 3.4 Iterators and Zero-Cost Abstractions

@@ -26,6 +26,6 @@
     - [`thiserror` for Crate Level Errors](./book/chapter_04.md#43-thiserror-for-crate-level-errors)
     - [Reserve `anyhow` for Binaries](./book/chapter_04.md#44-reserve-anyhow-for-binaries)
     - [Use `?` to Bubble Errors](./book/chapter_04.md#45-use--to-bubble-errors)
-    - [Unit Tests should excercise errors](./book/chapter_04.md#46-unit-test-should-excercise-errors)
+    - [Unit Tests should exercise errors](./book/chapter_04.md#46-unit-test-should-excercise-errors)
     - [Important Topics](./book/chapter_04.md#47-important-topics)
 - [Final Notes](./book/zz_final_notes.md)

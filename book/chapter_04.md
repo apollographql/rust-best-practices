@@ -27,9 +27,9 @@ fn divide(x: f64, y: f64) -> Result<f64, DivisionError> {
 
 ## 4.2 Avoid `unwrap`/`expect` in Production
 
-Although `expect` is prefered to `unwrap`, as it can have context, they should be avoided in production code as there are smarter alternatives to them. Considering that, they should be used in the following scenarions:
+Although `expect` is preferred to `unwrap`, as it can have context, they should be avoided in production code as there are smarter alternatives to them. Considering that, they should be used in the following scenarios:
 - In tests, assertions or test helper functions.
-- When faillure is impossible.
+- When failure is impossible.
 - When the smarter options can't handle the specific case.
 
 ### 🚨 Alternative ways of handling `unwrap`/`expect`:
@@ -48,7 +48,7 @@ if let Ok(json) = serde_json::from_str(&input) else {
     Err(do_something_with_input(&input))
 }
 ```
-* Functions that can have to handle `Option::None` values are recomended to return `Result<T, E>`, where `E` is a crate or module level error, like the examples above.
+* Functions that can have to handle `Option::None` values are recommended to return `Result<T, E>`, where `E` is a crate or module level error, like the examples above.
 * Lastly `unwrap_or`, `unwrap_or_else` or `unwrap_or_default`, these functions help you create alternative exits to unwrap that manage the uninitialized values.
 
 ## 4.3 `thiserror` for Crate level errors
@@ -92,7 +92,7 @@ pub enum ServiceError {
 
 ## 4.4 Reserve `anyhow` for Binaries
 
-`anyhow` is an amazing crate, and quite useful for projects that are begining and need accelerated speed. However, there is a turning point where it just painfully propagates through your code, considering this, `anyhow` is recomended only for **binaries**, where ergonomic error handling is needed and there is no need for precise error types:
+`anyhow` is an amazing crate, and quite useful for projects that are beginning and need accelerated speed. However, there is a turning point where it just painfully propagates through your code, considering this, `anyhow` is recommended only for **binaries**, where ergonomic error handling is needed and there is no need for precise error types:
 
 ```rust
 use anyhow::{Context, Result, anyhow};
@@ -127,7 +127,7 @@ fn handle_request(req: &Request) -> Result<ValidatedRequest, RequestValidationEr
 
 > In case error recovery is needed, use `or_else`, `map_err`, `if let Ok(..) else`. To **inspect or log your error**, use `inspect_err`.
 
-## 4.6 Unit Test should excercise errors
+## 4.6 Unit Test should exercise errors
 
 While many errors don't implement PartialEq and Eq, making it had to do direct assertions between them, it is possible to check the error messages with `format!` or `to_string()`, making the errors meaningful and test validated:
 
