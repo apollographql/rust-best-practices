@@ -172,7 +172,7 @@ When using async runtimes, like Tokio, make sure that your errors implement `Sen
 
 ```rust
 #[tokio::main]
-async fn main() -> Result<(), Box<dync std::error::Error + Send + Sync>> {
+async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
     ...
     Ok(())
 }
