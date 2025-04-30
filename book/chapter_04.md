@@ -19,7 +19,7 @@ fn divide(x: f64, y: f64) -> Result<f64, DivisionError> {
 }
 ```
 
-* Use `panic!` only in unrecoverable conditions - typically tests, assetions, bugs or a need to crash the application for some explicit reason.
+* Use `panic!` only in unrecoverable conditions - typically tests, assertions, bugs or a need to crash the application for some explicit reason.
 * There are 3 relevant macros that can replace `panic!` in appropriate conditions:
     * `todo!`, similar to panic, but alerts the compiler that you are aware that there is code missing.
     * `unreachable!`, you have reasoned about the code block and are sure that condition `xyz` is not possible and if ever becomes possible you want to be alerted.
