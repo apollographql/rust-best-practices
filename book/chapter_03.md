@@ -4,7 +4,7 @@ The **golden rule** of performance work:
 
 > Don't guess, measure.
 
-Rust code is often already pretty fast - don't "optimize" without evidence. Ooptimize only after finding bottlenecks.
+Rust code is often already pretty fast - don't "optimize" without evidence. Optimize only after finding bottlenecks.
 
 ### A good first steps
 * Use `--release` flag on you builds (might sound dummy, but it is quite common to hear people complaining that their Rust code is slower than their X language code, and 99% of the time is because they didn't use the `--release` flag).
