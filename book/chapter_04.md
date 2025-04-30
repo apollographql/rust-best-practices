@@ -135,7 +135,7 @@ While many errors don't implement PartialEq and Eq, making it had to do direct a
 #[test]
 fn error_does_not_implement_partial_eq() {
     let err = divide(10., 0.0).unwrap_err();
-    assert_eq(err.to_string(), "division by zero");
+    assert_eq!(err.to_string(), "division by zero");
 }
 
 #[test]
