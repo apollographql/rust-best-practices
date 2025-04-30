@@ -103,7 +103,7 @@ In sections [Borrowing over Cloning](./chapter_01.md#11-borrowing-over-cloning) 
     assert_eq!(Point { x: 1, y: 0 } + Point { x: 2, y: 3 },
             Point { x: 3, y: 3 });
     ```
-    * Need to do comparison snapshops or due to API you need multiple owned instances of the data.
+    * Need to do comparison snapshots or due to API you need multiple owned instances of the data.
     ```rust
     fn snapshot(a: &MyValue, b:&MyValue) -> MyValueDiff {
         a - b
