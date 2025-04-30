@@ -499,3 +499,6 @@ When deeper justification is needed, prefer to:
 * Move runtime example and usage docs into Rust Docs, `/// doc comment`, where they can be tested and kept up-to-date by tools like `cargo doc`.
 
 > Doc-comments and Doc-testing, `///` and `//!` in [chapter 12](./chapter_12.md)
+
+## Maybe there's eventually a section on "when to pass ownership" also, since we should get into &mut T vs mut T.
+## When to use const
