@@ -142,7 +142,7 @@ fn error_does_not_implement_partial_eq() {
 fn error_implements_partial_eq() {
     let err = process(my_value).unwrap_err();
 
-    assert_eq(
+    assert_eq!(
         err,
         MyError {
             ..
