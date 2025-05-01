@@ -40,7 +40,7 @@ Potential aditions elements to add:
 
 | Lint Name | Why | Link |
 | --------- | ----| -----|
-| `redundant_clone` | Detects unnecessary `clones`, has performance impact | [link (nursery)](https://rust-lang.github.io/rust-clippy/master/#redundant_clone) |
+| `redundant_clone` | Detects unnecessary `clones`, has performance impact | [link (nursery + perf)](https://rust-lang.github.io/rust-clippy/master/#redundant_clone) |
 | `needless_borrow` group | Removes redundant `&` borrowing | [link (style)](https://rust-lang.github.io/rust-clippy/master/#needless_borrow) |
 | `map_unwrap_or` / `map_or` | Simplifies nested `Option/Result` handling | [`map_unwrap_or`](https://rust-lang.github.io/rust-clippy/master/#map_unwrap_or) [`unnecessary_map_or`](https://rust-lang.github.io/rust-clippy/master/#unnecessary_map_or) [`unnecessary_result_map_or_else`](https://rust-lang.github.io/rust-clippy/master/#unnecessary_result_map_or_else) |
 | `manual_ok_or` | Suggest using `.ok_or_else` insteadh o `match` | [link (style)](https://rust-lang.github.io/rust-clippy/master/#manual_ok_or) |
