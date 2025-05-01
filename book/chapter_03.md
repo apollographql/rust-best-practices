@@ -126,7 +126,7 @@ In sections [Borrowing over Cloning](./chapter_01.md#11-borrowing-over-cloning) 
     }
     ```
 * You have reference counted pointers (`Arc, Rc`).
-* You have small structs that are to big to `Copy` but as costly as `std::collections`. An example is HTTP client like `hyper::client`.
+* You have small structs that are to big to `Copy` but as costly as `std::collections`. An example is HTTP client like `hyper_util::client::legacy::Client` that cloning allows you to share the connection pool.
 * You have a chained struct modifier that needs owned mutation, some **builders** require owned mutation, but most custom builders can be done with `pub fn with_xyz(&mut self, value: Xyz) -> &mut Self`.
 ```rust
 // Inline `HashMap` insertion extension
@@ -136,6 +136,12 @@ fn insert_owned(mut self, key: K, value: V) -> Self {
     self
 }
 
+```
+* Ownership can also be a good way to model business logic / state. For example:
+```rust
+let unvalidated: String = ...;// some user source
+let validated = Validate::try_from(unvalidated)?;
+// Technically that `try_from` maybe didn't need ownership, but taking it lets us model intent
 ```
 
 ### When **NOT** to pass ownership?
