@@ -1,0 +1,120 @@
+# This is the template workflow for the deployment of databricks notebooks for main and docs branch.
+# Required environment variables and secrets:
+
+name: deploy-confluence
+on:
+  # Triggers the workflow on push or pull request events but only for the default branch
+  push:
+    branches: [ main, book/* ]
+  workflow_dispatch:
+
+jobs:
+  deploy-confluence:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Setup checkout
+        uses: actions/checkout@v3
+      - name: Install dependencies
+        run: |
+            python -m pip install pandas python-dotenv markdown py-gfm atlassian-python-api
+      - name: Sync with Confluence
+        env: 
+          CONF_USER: ${{ secrets.CONF_USER }}
+          CONF_TOKEN: ${{ secrets.CONF_TOKEN }}
+        run: |
+          import os
+          from os.path import join
+          import pandas as pd
+
+          import requests
+          from markdown import markdown
+          from mdx_gfm import GithubFlavoredMarkdownExtension
+
+          from atlassian import Confluence
+
+          """
+          Every file upload requires a few steps: 
+          1. Open the markdown file and read its content 
+          2. Create the content that needs to be compared and updated
+          3. Update content with the confluence API 
+
+          In case of an image: 
+          4. Image needs to be uploaded to the confluence page
+
+          For these steps a few parameters are needed:
+          - Cloud
+          - User
+          - Token
+          """
+
+          # Set generic parameters
+          cloud = 'igBXWw'
+          user = os.getenv('CONF_USER')
+          token = os.getenv('CONF_TOKEN')
+          workspace = os.getenv('GITHUB_WORKSPACE')
+
+          if not workspace:
+              exit(1)
+
+          def open_markdown_file(file_path):
+              with open(join(workspace, file_path)) as f:
+                  md = f.read()
+              
+              return md
+
+          def upload_confluence_content(file_path, page_to, user, token):
+              # set base url
+              url = f"https://apollographql.atlassian.net/wiki/x/igBXWw"
+              
+              current = requests.get(url, auth=(user, token)).json()
+
+              html = markdown(open_markdown_file(file_path), extensions=[GithubFlavoredMarkdownExtension()])
+              content = {
+                  'id': current['id'],
+                  'type': current['type'],
+                  'title': current['title'],
+                  'version': {'number': current['version']['number'] + 1},
+                  'body': {
+                      'editor': {
+                          'value': html,
+                          'representation': 'editor'
+                      }
+                  }
+              }
+
+              updated = requests.put(url, json=content, auth=(user, token)).json()
+              link = updated['_links']['base'] + updated['_links']['webui']
+
+              return print(f'Uploaded content successfully to page {link}')
+
+          def upload_confluence_image(image_path, page_to, user, token):
+              confluence = Confluence(
+                  url = f"https://apollographql.atlassian.net",
+                  username=user,
+                  password=token)
+              try:
+                  confluence.attach_file(image_path, name=None, content_type=None, page_id=page_to, title=None, space=None, comment=None)
+                  return print("Uploaded image to Confluence")
+              except Exception as e:
+                  raise e
+
+          # Read list of content to upload to Confluence
+          confluence_list = pd.read_csv(join(workspace, 'docs/docs_for_confluence.csv'), header='infer', sep=';')
+
+          # Go through contnet to upload
+          for index, row in confluence_list.iterrows():
+              if row['type'] == 'content':
+                  file_path = join(workspace, row['path'])
+                  page_to = row['page_to']
+                  upload_confluence_content(file_path, page_to, user, token)
+              
+              if row['type'] == 'image':
+                  image_path = join(workspace, row['path'])
+                  page_to = row['page_to']
+                  upload_confluence_image(image_path, page_to, user, token)
+
+              else:
+                  print("Content type is not recognized and therefore not uploaded to Confluence")
+        shell: python
+
+        
