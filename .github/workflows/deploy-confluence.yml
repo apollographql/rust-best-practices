@@ -52,6 +52,8 @@ jobs:
           cloud = 'apollographql'
           user = os.getenv('CONF_USER')
           token = os.getenv('CONF_TOKEN')
+
+          print(f"({user}:{token})")
           workspace = os.getenv('GITHUB_WORKSPACE')
 
           if not workspace:
