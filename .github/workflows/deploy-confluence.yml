@@ -59,7 +59,7 @@ jobs:
           print(f"Workspace: `{workspace}`")
 
           if not workspace:
-              print(f"Workspace Not founds")
+              print(f"Workspace Not found")
               exit(1)
 
           def open_markdown_file(file_path):
@@ -109,7 +109,6 @@ jobs:
 
           # Go through contnet to upload
           for index, row in confluence_list.iterrows():
-              print(f"Row: `{row}`")
               if row['type'] == 'content':
                   file_path = join(workspace, row['path'])
                   page_to = row['page_to']
