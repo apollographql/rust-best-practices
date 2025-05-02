@@ -100,3 +100,62 @@ fn all_animais_greeting(animals: Vec<Box<dyn Animal>>) {
 * If you are not sure, start with generics, trait bound them - then use `Box<dyn Trait>` when flexibility outwighs speed.
 
 > Favor static dispatch until your trait needs to live behind a pointer.
+
+## 6.5 Best Practices for Dynamic Dispatch
+
+Dynamic dispatch `Ptr<dyn Trait>` is a powerful tool, but it also has significant performance trade-offs. You should only reach for it when **type erasure or runtime polymorphism** are essential. It is important to know when you need Trait Objects:
+
+### ✅ Use Dynamic Dispatch When:
+
+* You need heteregeneous types in a collection:
+```rust
+fn all_animais_greeting(animals: Vec<Box<dyn Animal>>) {
+    for animal in animals {
+        println!("{}", animal.greet())
+    }
+}
+```
+
+* You want runtime plugins or hot-swappable components.
+* You want to abstract ubterbak from the caller (library design).
+
+
+### ❌ Avoid Dynamic Dispatch When:
+
+* You control the concrete types.
+* You are writing code in performance critical paths.
+* You can express the same logic in other ways while keeping simplicity, e.g. generics.
+
+## 6.6 🚨 Trait Objects Ergonomics
+
+* Prefer `&dyn Trait` over `Box<dyn Trait>` when you don't need ownership.
+* Use `Arc<dyn Trait + Send + Sync>` for shared access across threads.
+* Don't use `dyn Trait` if the trait has methods that return `Self`.
+* **Avoid boxing too early**. Don't box inside structs unless you are sure it'll be beneficial or is required (recursive).
+```rust
+// ✅ Use generics when possible
+struct Renderer<B: RenderBackend> {
+    backend: B
+}
+
+// ❌ Premature Boxing
+struct Renderer {
+    backend: Box<dyn RenderBackend> // Boxing too early
+}
+```
+* If you must expose a `dyn trait` in a public API, `Box` at the boundary, not internally.
+* **Object Safety**: You can only create `dyn Traits` from object-safe traits:
+    * It has **no generic methods**.
+    * It doesn't require `Self: Sized`.
+    * All method signatures use `&self`, `&mut self` or `self`.
+    ```rust
+    // ✅ Object Safe
+    trait Runnable {
+        fn run(&self);
+    }
+
+    // ❌ Not Object Safe
+    trait Factory {
+        fn create<T>() -> T; // generic methods are not allowed
+    }
+    ```
