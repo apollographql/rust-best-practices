@@ -48,7 +48,7 @@ jobs:
           """
 
           # Set generic parameters
-          cloud = 'igBXWw'
+          cloud = 'apollographql'
           user = os.getenv('CONF_USER')
           token = os.getenv('CONF_TOKEN')
           workspace = os.getenv('GITHUB_WORKSPACE')
@@ -64,8 +64,9 @@ jobs:
 
           def upload_confluence_content(file_path, page_to, user, token):
               # set base url
-              url = f"https://{cloud}.atlassian.net/wiki/rest/api/content/{page_to}"
-              
+              url = f"https://apollographql.atlassian.net/wiki/rest/api/content/{page_to}"
+              print(f'Confluence URL {url}')
+
               res = requests.get(url, auth=(user, token))
               print(f'Response from confluence {res}')
               current = res.json()
