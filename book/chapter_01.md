@@ -498,4 +498,4 @@ When deeper justification is needed, prefer to:
 * **Link to a Design Doc or an ADR**, business logic lives well in design docs while performance tradeoffs live well in ADRs.
 * Move runtime example and usage docs into Rust Docs, `/// doc comment`, where they can be tested and kept up-to-date by tools like `cargo doc`.
 
-> Doc-comments and Doc-testing, `///` and `//!` in [chapter 12](./chapter_12.md)
+> Doc-comments and Doc-testing, `///` and `//!` in [chapter xx](./chapter_xx.md)
