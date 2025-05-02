@@ -64,9 +64,11 @@ jobs:
 
           def upload_confluence_content(file_path, page_to, user, token):
               # set base url
-              url = f"https://apollographql.atlassian.net/wiki/x/igBXWw"
+              url = f"https://{cloud}.atlassian.net/wiki/rest/api/content/{page_to}"
               
-              current = requests.get(url, auth=(user, token)).json()
+              res = requests.get(url, auth=(user, token))
+              print(f'Response from confluence {res}')
+              current = res.json()
 
               html = markdown(open_markdown_file(file_path), extensions=[GithubFlavoredMarkdownExtension()])
               content = {
