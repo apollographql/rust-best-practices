@@ -19,8 +19,8 @@ jobs:
             python -m pip install pandas python-dotenv markdown py-gfm atlassian-python-api
       - name: Sync with Confluence
         env: 
-          CONF_USER: ${{ secrets.CONF_USER }}
-          CONF_TOKEN: ${{ secrets.CONF_TOKEN }}
+          CONF_USER: ${{ secrets.CONF_USER.CONF_USER }}
+          CONF_TOKEN: ${{ secrets.CONF_USER.CONF_TOKEN }}
         run: |
           import os
           from os.path import join
