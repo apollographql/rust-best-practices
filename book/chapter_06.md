@@ -117,7 +117,7 @@ fn all_animais_greeting(animals: Vec<Box<dyn Animal>>) {
 ```
 
 * You want runtime plugins or hot-swappable components.
-* You want to abstract ubterbak from the caller (library design).
+* You want to abstract internals from the caller (library design).
 
 
 ### ❌ Avoid Dynamic Dispatch When:
