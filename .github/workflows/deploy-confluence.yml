@@ -22,6 +22,7 @@ jobs:
           PYTHONUNBUFFERED: "1"
           CONF_USER: ${{ secrets.CONF_USER }}
           CONF_TOKEN: ${{ secrets.CONF_TOKEN }}
+          # GITHUB_WORKSPACE: ${{ GITHUB_WORKSPACE }}
         run: |
           import os
           from os.path import join
@@ -55,8 +56,10 @@ jobs:
 
           print(f"({user}:{token})")
           workspace = os.getenv('GITHUB_WORKSPACE')
+          print(f"Workspace: `{workspace}`")
 
           if not workspace:
+              print(f"Workspace Not founds")
               exit(1)
 
           def open_markdown_file(file_path):
@@ -68,11 +71,8 @@ jobs:
           def upload_confluence_content(file_path, page_to, user, token):
               # set base url
               url = f"https://apollographql.atlassian.net/wiki/rest/api/content/{page_to}"
-              print(f'Confluence URL {url}')
-
-              res = requests.get(url, auth=(user, token))
-              print(f'Response from confluence {res}')
-              current = res.json()
+              print(f'Confluence URL `{url}`')
+              current = requests.get(url, auth=(user, token)).json()
 
               html = markdown(open_markdown_file(file_path), extensions=[GithubFlavoredMarkdownExtension()])
               content = {
@@ -109,6 +109,7 @@ jobs:
 
           # Go through contnet to upload
           for index, row in confluence_list.iterrows():
+              print(f"Row: `{row}`"")
               if row['type'] == 'content':
                   file_path = join(workspace, row['path'])
                   page_to = row['page_to']
