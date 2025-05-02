@@ -99,7 +99,7 @@ jobs:
                   raise e
 
           # Read list of content to upload to Confluence
-          confluence_list = pd.read_csv(join(workspace, 'docs/docs_for_confluence.csv'), header='infer', sep=';')
+          confluence_list = pd.read_csv(join(workspace, 'docs_for_confluence.csv'), header='infer', sep=';')
 
           # Go through contnet to upload
           for index, row in confluence_list.iterrows():

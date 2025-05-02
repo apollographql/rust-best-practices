@@ -1,0 +1,11 @@
+type;page_to;path;
+image;{page_id};images/insta.png
+image;{page_id};images/flamegraph.png
+content;{page_id};README.md
+content;{page_id};book/chapter_01.md
+content;{page_id};book/chapter_02.md
+content;{page_id};book/chapter_03.md
+content;{page_id};book/chapter_04.md
+content;{page_id};book/chapter_05.md
+content;{page_id};book/chapter_06.md
+content;{page_id};book/zz_final_notes.md
