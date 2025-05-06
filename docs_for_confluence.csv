@@ -1,5 +1,6 @@
 type;page_to;path;
 image;1532592393;images/insta.png
+image;1532592393;images/insta.svg
 image;1532592375;images/flamegraph.png
 content;1532232017;book/chapter_01.md
 content;1532330316;book/chapter_02.md
@@ -7,5 +8,6 @@ content;1532592375;book/chapter_03.md
 content;1532232027;book/chapter_04.md
 content;1532592393;book/chapter_05.md
 content;1532559604;book/chapter_06.md
+content;1535115365;book/chapter_07.md
 content;1532363364;book/zz_final_notes.md
 content;1532428426;README.md

@@ -1,9 +1,5 @@
-# This is the template workflow for the deployment of databricks notebooks for main and docs branch.
-# Required environment variables and secrets:
-
 name: deploy-confluence
 on:
-  # Triggers the workflow on push or pull request events but only for the default branch
   push:
     branches: [ main, book/* ]
   workflow_dispatch:
@@ -22,7 +18,6 @@ jobs:
           PYTHONUNBUFFERED: "1"
           CONF_USER: ${{ secrets.CONF_USER }}
           CONF_TOKEN: ${{ secrets.CONF_TOKEN }}
-          # GITHUB_WORKSPACE: ${{ GITHUB_WORKSPACE }}
         run: |
           import os
           from os.path import join
