@@ -194,7 +194,7 @@ Tests that go under the `tests/` directory, they are entirely external to your l
 
 ### Doc Testing
 
-As mentioned in section [`5.2](#52-add-test-examples-to-your-docs), doc tests should have happy paths, general public API usage and more powerful attributes that improve documentation, like custom CSS for the code blocks.
+As mentioned in section [5.2](#52-add-test-examples-to-your-docs), doc tests should have happy paths, general public API usage and more powerful attributes that improve documentation, like custom CSS for the code blocks.
 
 ### Attributes:
 

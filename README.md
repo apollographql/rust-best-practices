@@ -1,4 +1,11 @@
 # Rust Programming Best Practices Handbook
+
+This book is complementary to the Rust Official API Guidelines:
+* [Rust Official API Guidelines](https://rust-lang.github.io/api-guidelines/about.html)
+
+As another source of reference, the Rust Analyzer Style Guide should also be used:
+* [Rust Analyzer Style Guide](https://rust-analyzer.github.io/book/contributing/style.html)
+
 ## Connectors dev team "From Practice to Practitione"
 
 ## Summary
