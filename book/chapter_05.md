@@ -3,32 +3,42 @@
 > Tests are not just for correctness. They are the first place people look to understand how your code works.
 
 * Tests in rust are declared with the attribute macro `#[test]`. Most code editors can compile and run the functions declared under the macro individually or blocks of them.
-* Test can have special compilation flags with `#[cfg(test)]`. Also executable in code editors if it contained `#[test]`, it is a good way to mock complicated functions or override Traits.
+* Test can have special compilation flags with `#[cfg(test)]`. Also executable in code editors if it contained `#[test]`, it is a good way to mock complicated functions or override traits.
 
 ## 5.1 Tests as Living Documentation
 
-In Rust, as in many other languages, tests often show how the functions is meant to be used. If a test is clear and targeted, it's often more helpful than reading the function body, when combined with other tests, they serve as living documentation.
+In Rust, as in many other languages, tests often show how the functions are meant to be used. If a test is clear and targeted, it's often more helpful than reading the function body, when combined with other tests, they serve as living documentation.
 
-### 🧪 Write intention-reveling tests
+### Use descriptive names
 
-* use descriptive names.
-* Keep relevant test functions together - avoid switching context on each unit test.
-* Don't just check "does it work?" - show what it is supposed to do.
-* Don't clutter many assertions together - allow each test to be executed independently.
-* If a test setup is too frequent, write helper functions with descriptive names.
-* Test errors and panics.
-
-> There are many different testing standard and Rust doesn't have a default. However, for unit tests is a bit easier to define how a test is named and organized. In the unit test name we should see the following:
-> * `unit_of_work`: which *function* we are calling. The **action** that will be executed.
-> * `state_that_the_test_will_check`: the general **arrangement**, or setup, of the specific test case.
+> In the unit test name we should see the following:
+> * `unit_of_work`: which *function* we are calling. The **action** that will be executed. This is often be the name of the the test `mod` where the function is being tested.
+```rust
+#[cfg(test)] 
+mod test { 
+  mod function_name { 
+    #[test] 
+    fn returns_y_when_x() { ... } 
+  } 
+}
+```
 > * `expected_behaviour`: the set of **assertions** that we need to verify that the test works.
+> * `state_that_the_test_will_check`: the general **arrangement**, or setup, of the specific test case.
 
-### ✅ Good tests examples:
-
-* Start with the happy paths.
+#### ❌ Don't use a generic name for a test
 ```rust
 #[test]
-fn process_when_a_larger_than_b_returns_blob() {
+fn test_add_happy_path() {
+    assert_eq!(add(2, 2), 4);
+}
+```
+#### ✅ Use a name which reads like a sentence, describing the desired behavior
+> Alternatively, if you function has too many tests, you can blob them together in a `mod`, it makes it easier to read and navigate.
+
+```rust
+// OPTION 1
+#[test]
+fn process_should_return_blob_when_larger_than_b() {
     let a = setup_a_to_be_xyz();
     let b = Some(2);
     let expected = MyExpectedStruct { ... };
@@ -37,78 +47,139 @@ fn process_when_a_larger_than_b_returns_blob() {
 
     assert_eq!(result, expected);
 }
-```
 
-* Follow by typical error cases:
-```rust
-#[test]
-fn process_when_b_is_negative_returns_error_xyz() {
-    let a = setup_a_to_be_xyz();
-    let b = Some(-5);
-    let expected = MyError::Xyz;
+// OPTION 2
+mod process {
+  #[test]
+  fn should_return_blob_when_larger_than_b() {
+      let a = setup_a_to_be_xyz();
+      let b = Some(2);
+      let expected = MyExpectedStruct { ... };
 
-    let result = process(a, b).unwrap_err();
+      let result = process(a, b).unwrap();
 
-    assert_eq!(result, expected);
+      assert_eq!(result, expected);
+  }
 }
 ```
 
-* Follow by corner error cases:
+> When executing `cargo test` the test output for each option will look like:
+> Option 1: `process_should_return_blob_when_larger_than_b`.
+> Option 2: `process::should_return_blob_when_larger_than_b`.
+
+### Use modules for organization
+
+Most IDEs can run a single module of tests all together.
+The test name in the output will also contain the name of the module.
+Together, that means you can use the module name to group related tests together:
+
 ```rust
-#[test]
-fn process_when_a_and_b_not_present_returns_error_invalid_input() {
-    let a = None;
-    let b = None;
-    let expected = MyError::InvalidInput;
+#[cfg(test)]
+mod test {  // IDEs will provide a ▶️ button here
 
-    let result = process(a, b).unwrap_err();
-
-    assert_eq!(result, expected);
-}
-```
-
-### ❌ Instead of:
-* Tests that don't show intent, by just naming the function:
-```rust
-#[test]
-fn test_add_happy_path() {
-    assert_eq!(add(2, 2), 4);
-}
-```
-
-* Test names that are too broad or generic
-```rust
-#[test]
-fn returns_sum_of_two_numbers() {
-    assert_eq!(add(2, 2), 4);
-}
-```
-
-* Tests with many assertion cases beocme hard to navigate and reason about failure cases, besides not serving as documentation.
-```rust
-#[test]
-fn test_add_happy_path() {
-    fn test_assertion_helper(...) {
-        assert_eq(...,..., "blobloblob")
-        assert_eq(...,..., "foofoofoo")
-        assert_eq(...,..., "barbarbar")
+  mod process {
+    #[test] // IDEs will provide a ▶️ button here
+    fn returns_error_xyz_when_b_is_negative() {
+        let a = setup_a_to_be_xyz();
+        let b = Some(-5);
+        let expected = MyError::Xyz;
+    
+        let result = process(a, b).unwrap_err();
+    
+        assert_eq!(result, expected);
     }
 
-    test_assertion_helper(a, b);
-    test_assertion_helper(a, c);
-    test_assertion_helper(b, c);
-    test_assertion_helper(c, a);
-    test_assertion_helper(c, b);
+    #[test] // IDEs will provide a ▶️ button here
+    fn returns_invalid_input_error_when_a_and_b_not_present() {
+      let a = None;
+      let b = None;
+      let expected = MyError::InvalidInput;
+
+      let result = process(a, b).unwrap_err();
+
+      assert_eq!(result, expected);
+    }
+  }
 }
 ```
+
+### Only test one behavior per function
+
+To keep tests clear, they should describe _one_ thing that the unit does.
+This makes it easier to understand why a test is failing.
+
+#### ❌ Don't test multiple things in the same test
+```rust
+fn test_thing_parser(...) {
+  assert!(Thing::parse("abcd").is_ok());
+  assert!(Thing::parse("ABCD").is_err());
+}
+```
+
+#### ✅ Test one thing per test
+```rust
+#[cfg(test)]
+mod test_thing_parser {
+  #[test]
+  fn lowercase_letters_are_valid() {
+    assert!(
+      Thing::parse("abcd").is_ok(),
+      // Works like `eprintln, format and println` macros 
+      "Thing parse error: {:?}", 
+      Thing::parse("abcd").unwrap_err()
+    );
+  }
+
+  #[test]
+  fn app_capital_letters_are_invalid() {
+    assert!(Thing::parse("ABCD").is_err());
+  }
+}
+```
+
+> `Ok` scenarios should have an `eprintln` of the `Err` case.
+
+### Use very few, ideally one, assertion per test
+
+When there are multiple assertions per test, it's both harder to understand the intended behavior and 
+often requires many iterations to fix a broken test, as you work through assertions one by one.
+
+❌ Don't include many assertions in one test:
+
+```rust
+#[test]
+fn test_valid_inputs() {
+  assert!(the_function("a").is_ok());
+  assert!(the_function("ab").is_ok());
+  assert!(the_function("ba").is_ok());
+  assert!(the_function("bab").is_ok());
+}
+```
+
+If you are testing separate behaviors, make multiple tests each with descriptive names.
+To avoid boilerplate, either use a shared setup function or [rstest](https://crates.io/crates/rstest) cases *with descriptive test names*:
+```rust
+#[rstest]
+#[case::single("a")]
+#[case::first_letter("ab")]
+#[case::last_letter("ba")]
+#[case::in_the_middle("bab")]
+fn the_function_accepts_all_strings_with_a(#[case] input: &str) {
+  assert!(the_function(input).is_ok());
+}
+```
+
+> Considerations when using `rstest`
+>
+> * It’s harder for both IDEs and humans to run/locate specific tests.
+> * Expectation vs condition naming is now visually inverted (expectation first).
 
 ## 5.2 Add Test Examples to your Docs
 
 We will deep dive into docs at a later stage, so in this section we will just briefly go over how to add tests to you docs. Rustdoc can turn examples into executable tests using `///` with a few advantages:
 
-* These tests run with `cargo test` and `cargo nextest run`.
-* They can be individually executed with `cargo test doc`.
-* They serve both as documatation and correctness checks, and are kept up to date by changes, due to the fact that the compiler checks them.
+* These tests run with `cargo test` **BUT NOT** `cargo nextest run`. If using `nextest`, make sure to run `cargo t --doc` separately.
+* They serve both as documentation and correctness checks, and are kept up to date by changes, due to the fact that the compiler checks them.
 * No extra testing boilerplate. You can easily hide test sections by prefixing the line with `#`.
 * ❗ There is no issue if you have test duplication between doc-tests and other non-public facing tests.
 
@@ -147,7 +218,7 @@ As a general rule, without delving into *test pyramid naming*, rust has 3 sets o
 
 ### Unit Test
 
-Test that go in the **same module** as the **tested unit** was declared, this allows the test runner to have visibility over private functions and parent `use` declarations. They can also consume `pub(crate)` functions from other modules if needed. Unit tests can be more focused on **implementation and edge-cases checks**.
+Tests that go in the **same module** as the **tested unit** was declared, this allows the test runner to have visibility over private functions and parent `use` declarations. They can also consume `pub(crate)` functions from other modules if needed. Unit tests can be more focused on **implementation and edge-cases checks**.
 
 * They should be as simple as possible, testing one state and one behaviour of the unit. KISS.
 * They should test for errors and edge cases.
@@ -209,7 +280,7 @@ Rust comes with 2 macros to make assertions:
 * `assert!` for asserting boolean values like `assert!(value.is_ok(), "'value' is not Ok: {value:?}")`
 * `assert_eq!` for checking equality between two different values, `assert_eq!(result, expected, "'result' differs from 'expected': {}", result.diff(expected))`.
 
-### 🚨 `assert!` remainders
+### 🚨 `assert!` reminders
 * Rust asserts support formatted strings, like the previous examples, those strings will be printed in case of failure, so it is a good practice to add what the actual state was and how it differs from the expected.
 * If you don't care about the exact pattern matching value, using `matches!` combined with `assert!` might be a good alternative.
 ```rust
@@ -264,7 +335,7 @@ Snapshot testing compares your output (text, Json, HTML, YAML, etc) against a sa
 * Very stable, numeric-only or small structured data associated logic (prefer `assert_eq!`).
 * Critical path logic (prefer precise unit tests).
 * Flaky tests, randomly generated output, unless redacted.
-* Snapshopts of external resources, use mocks and stubs.
+* Snapshots of external resources, use mocks and stubs.
 
 ## 5.6 ✅ Snapshot Best Practices
 
@@ -285,7 +356,7 @@ assert_snapshot!("app_config", whole_app_config); // Huge object
 > #### 🚨 Avoid snapshotting huge objects 
 > Huge objects become hard to review and reason about.
 
-* Avoid snapshoting simple types (primitives, flat enums, small structs):
+* Avoid snapshotting simple types (primitives, flat enums, small structs):
 ```rust
 // ✅ Better:
 assert_eq!(meaning_of_life, 42);
