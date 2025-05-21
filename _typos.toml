@@ -1,2 +1,5 @@
 [files]
 extend-exclude = ["*.svg", "**/*.svg", "target/**/*", "**/target/**/*"]
+
+[default.extend-words]
+ba = "ba"

@@ -12,9 +12,18 @@ In Rust, as in many other languages, tests often show how the functions are mean
 ### Use descriptive names
 
 > In the unit test name we should see the following:
-> * `unit_of_work`: which *function* we are calling. The **action** that will be executed. This should often be the name of the `mod`.
-> * `state_that_the_test_will_check`: the general **arrangement**, or setup, of the specific test case.
+> * `unit_of_work`: which *function* we are calling. The **action** that will be executed. This is often be the name of the the test `mod` where the function is being tested.
+```rust
+#[cfg(test)] 
+mod test { 
+  mod function_name { 
+    #[test] 
+    fn returns_y_when_x() { ... } 
+  } 
+}
+```
 > * `expected_behaviour`: the set of **assertions** that we need to verify that the test works.
+> * `state_that_the_test_will_check`: the general **arrangement**, or setup, of the specific test case.
 
 #### ❌ Don't use a generic name for a test
 ```rust
@@ -24,9 +33,12 @@ fn test_add_happy_path() {
 }
 ```
 #### ✅ Use a name which reads like a sentence, describing the desired behavior
+> Alternatively, if you function has too many tests, you can blob them together in a `mod`, it makes it easier to read and navigate.
+
 ```rust
+// OPTION 1
 #[test]
-fn process_returns_blob_when_a_larger_than_b() {
+fn process_should_return_blob_when_larger_than_b() {
     let a = setup_a_to_be_xyz();
     let b = Some(2);
     let expected = MyExpectedStruct { ... };
@@ -35,7 +47,25 @@ fn process_returns_blob_when_a_larger_than_b() {
 
     assert_eq!(result, expected);
 }
+
+// OPTION 2
+mod process {
+  #[test]
+  fn should_return_blob_when_larger_than_b() {
+      let a = setup_a_to_be_xyz();
+      let b = Some(2);
+      let expected = MyExpectedStruct { ... };
+
+      let result = process(a, b).unwrap();
+
+      assert_eq!(result, expected);
+  }
+}
 ```
+
+> When executing `cargo test` the test output for each option will look like:
+> Option 1: `process_should_return_blob_when_larger_than_b`.
+> Option 2: `process::should_return_blob_when_larger_than_b`.
 
 ### Use modules for organization
 
@@ -45,29 +75,31 @@ Together, that means you can use the module name to group related tests together
 
 ```rust
 #[cfg(test)]
-mod test_process {  // IDEs will provide a ▶️ button here
-  #[test]
-  fn returns_error_xyz_when_b_is_negative() {
-      let a = setup_a_to_be_xyz();
-      let b = Some(-5);
-      let expected = MyError::Xyz;
-  
+mod test {  // IDEs will provide a ▶️ button here
+
+  mod process {
+    #[test] // IDEs will provide a ▶️ button here
+    fn returns_error_xyz_when_b_is_negative() {
+        let a = setup_a_to_be_xyz();
+        let b = Some(-5);
+        let expected = MyError::Xyz;
+    
+        let result = process(a, b).unwrap_err();
+    
+        assert_eq!(result, expected);
+    }
+
+    #[test] // IDEs will provide a ▶️ button here
+    fn returns_invalid_input_error_when_a_and_b_not_present() {
+      let a = None;
+      let b = None;
+      let expected = MyError::InvalidInput;
+
       let result = process(a, b).unwrap_err();
-  
+
       assert_eq!(result, expected);
+    }
   }
-
-  #[test]
-  fn returns_invalid_input_error_when_a_and_b_not_present() {
-    let a = None;
-    let b = None;
-    let expected = MyError::InvalidInput;
-
-    let result = process(a, b).unwrap_err();
-
-    assert_eq!(result, expected);
-  }
-
 }
 ```
 
@@ -90,7 +122,12 @@ fn test_thing_parser(...) {
 mod test_thing_parser {
   #[test]
   fn lowercase_letters_are_valid() {
-    assert!(Thing::parse("abcd").is_ok());
+    assert!(
+      Thing::parse("abcd").is_ok(),
+      // Works like `eprintln, format and println` macros 
+      "Thing parse error: {:?}", 
+      Thing::parse("abcd").unwrap_err()
+    );
   }
 
   #[test]
@@ -99,6 +136,8 @@ mod test_thing_parser {
   }
 }
 ```
+
+> `Ok` scenarios should have an `eprintln` of the `Err` case.
 
 ### Use very few, ideally one, assertion per test
 
@@ -129,6 +168,11 @@ fn the_function_accepts_all_strings_with_a(#[case] input: &str) {
   assert!(the_function(input).is_ok());
 }
 ```
+
+> Considerations when using `rstest`
+>
+> * It’s harder for both IDEs and humans to run/locate specific tests.
+> * Expectation vs condition naming is now visually inverted (expectation first).
 
 ## 5.2 Add Test Examples to your Docs
 
