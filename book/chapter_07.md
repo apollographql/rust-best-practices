@@ -20,7 +20,7 @@ Models state at compile time, preventing bugs by making illegal states unreprese
 
 ## 7.3 Simple Example: File State
 
-[Github Example](https://github.com/apollographql/connectors-dev-best-practices/tree/main/examples/simple-type-state)
+[Github Example](https://github.com/apollographql/rust-best-practices/tree/main/examples/simple-type-state)
 ```rust
 use std::{io, path::{Path, PathBuf}};
 
@@ -82,7 +82,7 @@ impl File<FileOpened> {
 
 > Forces the user to **set required fields** before calling `.build()`.
 
-[Github Example](https://github.com/apollographql/connectors-dev-best-practices/tree/main/examples/type-state-builder)
+[Github Example](https://github.com/apollographql/rust-best-practices/tree/main/examples/type-state-builder)
 
 A type-state pattern can have more than one associated states:
 
