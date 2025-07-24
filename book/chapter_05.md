@@ -302,7 +302,7 @@ insta = { version = "1.42.2", features = ["yaml"] }
 > For most real world applications the recommendation is to use YAML snapshots of serializable values. This is because they look best under version control and the diff viewer and support redaction. To use this enable the yaml feature of insta.
 
 2. For a better review experience, add the CLI `cargo install cargo-insta`.
-<img src="/wiki/download/attachments/1532592393/insta.svg" />
+<img src="/wiki/download/attachments/1532592393/insta.svg" onerror="this.style.display='none'"/>
 
 ![cargo insta review](../images/insta.svg)
 
