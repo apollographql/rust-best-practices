@@ -54,7 +54,7 @@ cargo flamegraph --example some_example --features some_features
 > ❗ Always run your profiles with `--release` enabled, the `--dev` flag isn't realistic as it doesn't have optimizations enabled.
 
 The result will look like the following:
-<img src="/wiki/download/attachments/1532592375/flamegraph.png" width="1000px" height="377px"/>
+<img src="/wiki/download/attachments/1532592375/flamegraph.png" width="1000px" height="377px" onerror="this.style.display='none'"/>
 
 ![Flamegraph profile](../images/flamegraph.png)
 
