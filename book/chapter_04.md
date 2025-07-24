@@ -64,7 +64,7 @@ pub enum MyError {
     InvalidData(String),
     #[error(transparent)]
     Serialization(#[from] serde_json::Error),
-    #[error("Invalid request information. Header: {headers}, Metadata: {metadabe}")]
+    #[error("Invalid request information. Header: {headers}, Metadata: {metadata}")]
     InvalidRequest {
         headers: Headers,
         metadata: Metadata

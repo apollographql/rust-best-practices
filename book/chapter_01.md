@@ -11,7 +11,7 @@ Rust’s ownership system encourages **borrow** (`&T`) instead of **cloning** (`
 * When you have `Arc` or `Rc` pointers.
 * When data is shared across threads, usually `Arc`.
 * Avoid massive refactoring of non performance critical code.
-* When caching results (duumy example below):
+* When caching results (dummy example below):
 ```rust
 fn get_config(&self) -> Config {
   self.cached_config.clone()
@@ -342,12 +342,12 @@ for value in vec.iter().enumerate()
 
 > #### ❗REMEMBER: Iterators are Lazy
 >
-> * `.iter`, `.map`, `.filter` dont do anything until you call its consumer, e.g. `.collect`, `.sum`, `.for_each`.
+> * `.iter`, `.map`, `.filter` don't do anything until you call its consumer, e.g. `.collect`, `.sum`, `.for_each`.
 > * **Lazy Evaluation** means that iterator chains are fused into one loop at compile time.
 
 ### 🚨 Anti-patterns to AVOID
 
-* Don't chain without formatting. Prefer each chainned function on its own line with the correct indentation (`rustfmt` should take care of this).
+* Don't chain without formatting. Prefer each chained function on its own line with the correct indentation (`rustfmt` should take care of this).
 * Don't chain if it makes the code unreadable.
 * Avoid needlessly collect/allocate of a collection (e.g. vector) just to throw it away later by some larger operation or by another iteration.
 * Prefer `iter` over `into_iter` unless you don't need the ownership of the collection.
@@ -425,7 +425,7 @@ fn computation() {
 }
 ```
 
-### ✅ Breakung up long functions over commenting them
+### ✅ Breaking up long functions over commenting them
 
 If you find yourself writing a long comment explaining "what", "how" or "each step" in a function, it might be time to split it. So the suggestion is to refactor. This can be beneficial not only for readability, but testability:
 
@@ -463,7 +463,7 @@ mod tests {
     fn decode_validated_request() { ... }
 
     #[test]
-    fn authrorize_payload_xyz() { ... }
+    fn authorize_payload_xyz() { ... }
 }
 ```
 

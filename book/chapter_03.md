@@ -140,8 +140,8 @@ fn insert_owned(mut self, key: K, value: V) -> Self {
 ```
 * Ownership can also be a good way to model business logic / state. For example:
 ```rust
-let unvalidated: String = ...;// some user source
-let validated = Validate::try_from(unvalidated)?;
+let not_validated: String = ...;// some user source
+let validated = Validate::try_from(not_validated)?;
 // Technically that `try_from` maybe didn't need ownership, but taking it lets us model intent
 ```
 
@@ -177,7 +177,7 @@ hello_greet(Cow::Owned("Naomi".to_string()));
 
 * Keep small types (`impl Copy`, `usize`, `bool`, etc) **on the stack**.
 * Avoid passing huge types (`> 512 bytes`)  by value or transferring ownership. Prefer pass by reference (e.g. `&T` and `&mut T`).
-* Heap allocate recursive datastructures:
+* Heap allocate recursive data structures:
 ```rust
 enum OctreeNode<T> {
     Node(T),

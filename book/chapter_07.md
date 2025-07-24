@@ -16,7 +16,7 @@ Models state at compile time, preventing bugs by making illegal states unreprese
 * Models state transitions as type transitions. This is similar to a state machine, but in compile time.
 * Prevents data misuse, e.g. using uninitialized objects.
 * Improves API safety and correctness.
-* The phatom data field is removed after compilation so no extra memory is allocated.
+* The phantom data field is removed after compilation so no extra memory is allocated.
 
 ## 7.3 Simple Example: File State
 
@@ -63,7 +63,7 @@ impl File<FileOpened> {
 
         let mut content = String::new();
         let Some(handle)=  self.handle.as_mut() else {
-            unreachable!("Safe to unwrao as state can only be reached when file is open");
+            unreachable!("Safe to unwrap as state can only be reached when file is open");
         };
         handle.read_to_string(&mut content)?;
         Ok(content)
@@ -205,7 +205,7 @@ impl Client<Connected> {
 
 ### ✅ Use Type-State Pattern When:
 * Your want **compile-time state safety**.
-* You need to enforce **API connstraints**.
+* You need to enforce **API constraints**.
 * You are writing a library/crate that is heavy dependent on variants.
 * Your want to replace runtime booleans or enums with **type-safe code paths**.
 * You need compile time correctness.

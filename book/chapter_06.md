@@ -2,7 +2,7 @@
 
 > Static where you can, dynamic where you must
 
-Rust allows you to handle polymorphic code in two mais ways:
+Rust allows you to handle polymorphic code in two ways:
 * **Generics / Static Dispatch**: compile-time, monomorphized per use.
 * **Trait Objects / Dynamic Dispatch**: runtime vtable, single implementation.
 
@@ -77,7 +77,7 @@ impl Animal for Cat {
     }
 }
 
-fn all_animais_greeting(animals: Vec<Box<dyn Animal>>) {
+fn all_animals_greeting(animals: Vec<Box<dyn Animal>>) {
     for animal in animals {
         println!("{}", animal.greet())
     }
@@ -97,7 +97,7 @@ fn all_animais_greeting(animals: Vec<Box<dyn Animal>>) {
 
 * Prefer generics/static dispatch when you control the call site and want performance.
 * Use dynamic dispatch when you need abstraction, plugins or mixed types. 🚨 Runtime cost.
-* If you are not sure, start with generics, trait bound them - then use `Box<dyn Trait>` when flexibility outwighs speed.
+* If you are not sure, start with generics, trait bound them - then use `Box<dyn Trait>` when flexibility outweighs speed.
 
 > Favor static dispatch until your trait needs to live behind a pointer.
 
@@ -107,9 +107,9 @@ Dynamic dispatch `Ptr<dyn Trait>` is a powerful tool, but it also has significan
 
 ### ✅ Use Dynamic Dispatch When:
 
-* You need heteregeneous types in a collection:
+* You need heterogeneous types in a collection:
 ```rust
-fn all_animais_greeting(animals: Vec<Box<dyn Animal>>) {
+fn all_animals_greeting(animals: Vec<Box<dyn Animal>>) {
     for animal in animals {
         println!("{}", animal.greet())
     }
