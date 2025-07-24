@@ -189,7 +189,8 @@ enum OctreeNode<T> {
 ### ❗ Be Mindful
 
 * Only use `#[inline]` when benchmark proves beneficial, Rust is already pretty good at inlining **without** hints.
-* Avoid massive stack allocations, box them `let buffer: Box<[u8; 65536]> = Box::new(..)`.
+* Avoid massive stack allocations, box them. Example `let buffer: Box<[u8; 65536]> = Box::new(..)` would first allocate `[u8; 65536]` on the stack then box it, a non-const solution to this would be `let buffer: Box<[u8]> = vec![0; 65536].into_boxed_slice()`.
+* For large `const` arrays, considering using [crate smallvec](https://docs.rs/smallvec/latest/smallvec/) as it behaves like an array, but is smart enough to allocate large arrays on the heap.
 
 ## 3.4 Iterators and Zero-Cost Abstractions
 
