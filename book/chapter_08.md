@@ -14,7 +14,7 @@
 ## 8.2 When to use comments
 
 Use `//` comments (double slashed) when something can't be expressed clearly in code, like:
-* **Safety Guarantees**, some of done can be better expressed with code coditionals.
+* **Safety Guarantees**, some of done can be better expressed with code conditionals.
 * Workarounds or **Optimizations**.
 * Legacy or **platform-specific** behaviors. Some of them can be expressed with `#[cfg(..)]`.
 * Links to **Design Docs** or **ADRs**.
@@ -57,7 +57,7 @@ fn compute(counter: &mut usize) {
 
 ## 8.4 Don't Write Living Documentation (living comments)
 
-Comments as a "living documentation" is a **dangeroud myth**, as comments are **not free**:
+Comments as a "living documentation" is a **dangerous myth**, as comments are **not free**:
 * They **rot** - nobody compiles comments.
 * They **mislead** - readers usually assume they are true with no critique, e.g. "the other developer knows this code better than I do".
 * They **go stale** - unless maintained with the code, they become irrelevant.
@@ -187,7 +187,7 @@ pub fn add(a: i32, b: i32) -> i32 {
     a + b
 }
 ```
-* ✅ Write clear and descriptives **What it does** and **how to use it**.
+* ✅ Write clear and descriptive **What it does** and **how to use it**.
 * ✅ Use `# Examples` section to better explain **how to use it**.
 * ✅ Prefer writing examples that can be tested via `cargo test`, even if you have to hide their output with starting `#`:
 ```rust

@@ -140,8 +140,8 @@ fn insert_owned(mut self, key: K, value: V) -> Self {
 ```
 * Ownership can also be a good way to model business logic / state. For example:
 ```rust
-let unvalidated: String = ...;// some user source
-let validated = Validate::try_from(unvalidated)?;
+let not_validated: String = ...;// some user source
+let validated = Validate::try_from(not_validated)?;
 // Technically that `try_from` maybe didn't need ownership, but taking it lets us model intent
 ```
 
@@ -177,7 +177,7 @@ hello_greet(Cow::Owned("Naomi".to_string()));
 
 * Keep small types (`impl Copy`, `usize`, `bool`, etc) **on the stack**.
 * Avoid passing huge types (`> 512 bytes`)  by value or transferring ownership. Prefer pass by reference (e.g. `&T` and `&mut T`).
-* Heap allocate recursive datastructures:
+* Heap allocate recursive data structures:
 ```rust
 enum OctreeNode<T> {
     Node(T),
@@ -189,7 +189,8 @@ enum OctreeNode<T> {
 ### ❗ Be Mindful
 
 * Only use `#[inline]` when benchmark proves beneficial, Rust is already pretty good at inlining **without** hints.
-* Avoid massive stack allocations, box them `let buffer: Box<[u8; 65536]> = Box::new(..)`.
+* Avoid massive stack allocations, box them. Example `let buffer: Box<[u8; 65536]> = Box::new(..)` would first allocate `[u8; 65536]` on the stack then box it, a non-const solution to this would be `let buffer: Box<[u8]> = vec![0; 65536].into_boxed_slice()`.
+* For large `const` arrays, considering using [crate smallvec](https://docs.rs/smallvec/latest/smallvec/) as it behaves like an array, but is smart enough to allocate large arrays on the heap.
 
 ## 3.4 Iterators and Zero-Cost Abstractions
 

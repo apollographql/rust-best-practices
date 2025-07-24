@@ -1,0 +1,10 @@
+{
+    "cSpell.words": [
+        "flamegraph",
+        "Justfile",
+        "nextest",
+        "rstest",
+        "smallvec",
+        "xtask"
+    ]
+}

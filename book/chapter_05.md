@@ -22,7 +22,7 @@ mod test {
   } 
 }
 ```
-> * `expected_behaviour`: the set of **assertions** that we need to verify that the test works.
+> * `expected_behavior`: the set of **assertions** that we need to verify that the test works.
 > * `state_that_the_test_will_check`: the general **arrangement**, or setup, of the specific test case.
 
 #### ❌ Don't use a generic name for a test
@@ -220,7 +220,7 @@ As a general rule, without delving into *test pyramid naming*, rust has 3 sets o
 
 Tests that go in the **same module** as the **tested unit** was declared, this allows the test runner to have visibility over private functions and parent `use` declarations. They can also consume `pub(crate)` functions from other modules if needed. Unit tests can be more focused on **implementation and edge-cases checks**.
 
-* They should be as simple as possible, testing one state and one behaviour of the unit. KISS.
+* They should be as simple as possible, testing one state and one behavior of the unit. KISS.
 * They should test for errors and edge cases.
 * Different tests of the same unit can be combined under a single `#[cfg(test)] mod test_unit_of_work {...}`, allowing multiple submodules for different `units_of_work`.
 * Try to keep external states/side effects to your API to minimum and focus those tests on the `mod.rs` files.
@@ -233,7 +233,7 @@ mod unit_of_work_tests {
     use super::*;
 
     #[test]
-    fn unit_state_behaviour() {
+    fn unit_state_behavior() {
         let expected = ...;
         let result   = ...;
         assert_eq!(result, expected, "Failed because {}", result - expected);
@@ -271,7 +271,7 @@ As mentioned in section [5.2](#52-add-test-examples-to-your-docs), doc tests sho
 
 * `ignore`: tells rust to ignore the code, usually not recommended, if you want just a code formatted text, use `text`.
 * `should_panic`: tells the rust compiler that this example block will panic.
-* `no_run`: compiles but doensn't execute the code, similar to `cargo check`. Very useful when dealing with side-effects for documentation.
+* `no_run`: compiles but doesn't execute the code, similar to `cargo check`. Very useful when dealing with side-effects for documentation.
 * `compile_fail`: Test rustdoc that this block should cause a compilation fail, important when you want to demonstrate wrong use cases.
 
 ## 5.4 How to `assert!`
@@ -299,7 +299,7 @@ assert!(matches!(error, MyError::BadInput(_), "Expected `BadInput`, found {error
 ```toml
 insta = { version = "1.42.2", features = ["yaml"] }
 ```
-> For most real world applications the recommendation is to use YAML snapshots of serializable values. This is because they look best under version control and the diff viewer and support redactions. To use this enable the yaml feature of insta.
+> For most real world applications the recommendation is to use YAML snapshots of serializable values. This is because they look best under version control and the diff viewer and support redaction. To use this enable the yaml feature of insta.
 
 2. For a better review experience, add the CLI `cargo install cargo-insta`.
 <img src="/wiki/download/attachments/1532592393/insta.svg" />
@@ -341,7 +341,7 @@ Snapshot testing compares your output (text, Json, HTML, YAML, etc) against a sa
 
 * Named snapshots, it gives meaningful snapshot files names, e.g. `snapshots/this_is_a_named_snapshot.snap`
 ```rust
-assert_snapshopt!("this_is_a_named_snapshot", output);
+assert_snapshot!("this_is_a_named_snapshot", output);
 ```
 
 * Keep snapshots small and clear. 

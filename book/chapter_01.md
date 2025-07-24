@@ -11,7 +11,7 @@ Rust’s ownership system encourages **borrow** (`&T`) instead of **cloning** (`
 * When you have `Arc` or `Rc` pointers.
 * When data is shared across threads, usually `Arc`.
 * Avoid massive refactoring of non performance critical code.
-* When caching results (duumy example below):
+* When caching results (dummy example below):
 ```rust
 fn get_config(&self) -> Config {
   self.cached_config.clone()
@@ -24,7 +24,7 @@ fn get_config(&self) -> Config {
 * Auto-cloning inside loops `.map(|x| x.clone)`, prefer to call `.cloned()` or `.copied()` at the end of the iterator.
 * Cloning large data structures like `Vec<T>` or `HashMap<K, V>`.
 * Clone because of bad API design instead of adjusting lifetimes.
-* Prefer `&[T]` instead of `Vec<T>` or even `&Vec<T>`.
+* Prefer `&[T]` instead of `Vec<T>` or `&Vec<T>`.
 * Prefer `&str` or `&String` instead of `String`.
 * Prefer `&T` instead of `T`.
 * Clone a reference argument, if you need ownership, make it explicit in the arguments for the caller. Example:
@@ -71,13 +71,13 @@ let num = 1;
 let new_num = increment(num); // `num` still usable after this point
 ```
 
-### ❓Which structs should be `Copy`?
+### ❓ Which structs should be `Copy`?
 * When to consider declaring `Copy` on your own types:
 * All fields are `Copy` themselves.
 * The struct is `small`, up to 2 (maybe 3) words of memory or 24 bytes (each word is 64 bits/8bytes).
 * The struct **represents a “plain data object”**, without resourcing to ownership (no heap allocations. Example: `Vec` and `Strings`).
 
-❗**Rust Arrays are stack allocated.**
+❗**Rust Arrays are stack allocated.** Which means they can be copied if their underlying type is `Copy`, but this will be allocated in the program stack which can easily become a stack overflow. More on [Chapter 3 - Stack vs Heap](https://github.com/apollographql/rust-best-practices/blob/main/book/chapter_03.md#33-stack-vs-heap-be-size-smart)
 
 For reference, each primitive type size in bytes:
 
@@ -108,7 +108,7 @@ For reference, each primitive type size in bytes:
 | char     	| 4 bytes  	|
 
 
-### ✅Good struct to derive `Copy`:
+### ✅ Good struct to derive `Copy`:
 ```rust
 #[derive(Debug, Copy, Clone)]
 struct Point {
@@ -118,7 +118,7 @@ struct Point {
 }
 ```
 
-### ❌Bad struct to derive `Copy`:
+### ❌ Bad struct to derive `Copy`:
 ```rust
 #[derive(Debug, Clone)]
 struct BadIdea {
@@ -342,23 +342,23 @@ for value in vec.iter().enumerate()
 
 > #### ❗REMEMBER: Iterators are Lazy
 >
-> * `.iter`, `.map`, `.filter` dont do anything until you call its consumer, e.g. `.collect`, `.sum`, `.for_each`.
+> * `.iter`, `.map`, `.filter` don't do anything until you call its consumer, e.g. `.collect`, `.sum`, `.for_each`.
 > * **Lazy Evaluation** means that iterator chains are fused into one loop at compile time.
 
 ### 🚨 Anti-patterns to AVOID
 
-* Don't chain without formatting. Prefer each chainned function on its own line with the correct indentation (`rustfmt` should take care of this).
+* Don't chain without formatting. Prefer each chained function on its own line with the correct indentation (`rustfmt` should take care of this).
 * Don't chain if it makes the code unreadable.
 * Avoid needlessly collect/allocate of a collection (e.g. vector) just to throw it away later by some larger operation or by another iteration.
 * Prefer `iter` over `into_iter` unless you don't need the ownership of the collection.
 * Prefer `iter` over `into_iter` for collections that inner type implements `Copy`, e.g. `Vec<T: Copy>`.
-* For summing numbers prefer `.sum` over `.fold`. `.sum` is specialized for summing values, so the compiler knows it can make optimizations on that front, while fold has a blackbox closure that needs to be applied at every step. If you need to sum by an initial value, just added in the expression.
+* For summing numbers prefer `.sum` over `.fold`. `.sum` is specialized for summing values, so the compiler knows it can make optimizations on that front, while fold has a blackbox closure that needs to be applied at every step. If you need to sum by an initial value, just added in the expression `let my_sum = [1, 2, 3].sum() + 3`.
 
 ## 1.6 Comments: Context, not Clutter
 
 > "Context are for why, not what or how"
 
-Well-written Rust code, with expressive tyoes and good naming, often speaks for itself. Many high-quality codebases thrive on **few or no comments**. And that's a good thing.
+Well-written Rust code, with expressive types and good naming, often speaks for itself. Many high-quality codebases thrive on **few or no comments**. And that's a good thing.
 
 Still, there are **moments where code alone isn't enough** - when there are performance quirks, external constraints, or non-obvious tradeoffs that require a nudge to the reader. In those cases, a concise comment can prevent hours of head-scratching or searching git history.
 
@@ -385,7 +385,7 @@ Y * (THREE_HALVES - (number * 0.5 * y * y))
 * Clear code beats comments. However, when the why isn't obvious, say it plainly - or link to where:
 ```rust
 // PERF: Generating the root store per subgraph caused high TLS startup latency on MacOS
-// This works as a caching alternative. See: [ADR-123](kink/to/adr-123)
+// This works as a caching alternative. See: [ADR-123](link/to/adr-123)
 let subgraph_tls_root_store: RootCertStore = configuration
     .tls
     .subgraph
@@ -425,7 +425,7 @@ fn computation() {
 }
 ```
 
-### ✅ Breakung up long functions over commenting them
+### ✅ Breaking up long functions over commenting them
 
 If you find yourself writing a long comment explaining "what", "how" or "each step" in a function, it might be time to split it. So the suggestion is to refactor. This can be beneficial not only for readability, but testability:
 
@@ -463,7 +463,7 @@ mod tests {
     fn decode_validated_request() { ... }
 
     #[test]
-    fn authrorize_payload_xyz() { ... }
+    fn authorize_payload_xyz() { ... }
 }
 ```
 
