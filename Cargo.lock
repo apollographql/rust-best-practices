@@ -3,6 +3,10 @@
 version = 4
 
 [[package]]
+name = "once_cell"
+version = "0.1.0"
+
+[[package]]
 name = "simple-type-state"
 version = "0.1.0"
 

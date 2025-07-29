@@ -37,7 +37,7 @@ impl File<FileOpened> {
         Ok(content)
     }
 
-    fn path(&self) -> &PathBuf {
+    const fn path(&self) -> &PathBuf {
         &self.path
     }
 }

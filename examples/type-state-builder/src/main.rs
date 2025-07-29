@@ -22,8 +22,8 @@ struct Builder<HasName, HasAge> {
 }
 
 impl Builder<MissingName, MissingAge> {
-    fn new() -> Self {
-        Builder {
+    const fn new() -> Self {
+        Self {
             name: None,
             age: 0,
             _name_marker: PhantomData,

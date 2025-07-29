@@ -63,4 +63,7 @@ As another source of reference, the Rust Analyzer Style Guide should also be use
     - [When to use doc comments](https://github.com/apollographql/rust-best-practices/blob/main/book/chapter_08.md#87-when-to-use-doc-comments)
     - [Documentation in Rust: How, When and Why](https://github.com/apollographql/rust-best-practices/blob/main/book/chapter_08.md#88-documentation-in-rust-how-when-and-why)
     - [Checklist for Documentation coverage](https://github.com/apollographql/rust-best-practices/blob/main/book/chapter_08.md#89-checklist-for-documentation-coverage)
+- [Chapter 9 - Understanding Pointers](https://github.com/apollographql/rust-best-practices/blob/main/book/chapter_09.md)
+    - [Thread Safety](https://github.com/apollographql/rust-best-practices/blob/main/book/chapter_09.md#91-thread-safety)
+    - [When to use pointers](https://github.com/apollographql/rust-best-practices/blob/main/book/chapter_09.md#92-when-to-use-pointers)
 - [Final Notes](https://github.com/apollographql/rust-best-practices/blob/main/book/zz_final_notes.md)
