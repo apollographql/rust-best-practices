@@ -550,3 +550,13 @@ use super::schema::{Context, Payload};
 use super::update::convert_publish_payload;
 use crate::models::Event;
 ```
+
+One way of not having to manually control this is using the following arguments in your `rustfmt.toml`:
+
+```toml
+reorder_imports = true
+imports_granularity = "Crate"
+group_imports = "One"
+```
+
+> As of Rust version 1.88, it is necessary to execute rustfmt in nightly to correctly reorder code `cargo +nightly fmt`.
