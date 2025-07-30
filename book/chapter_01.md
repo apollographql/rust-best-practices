@@ -499,3 +499,64 @@ When deeper justification is needed, prefer to:
 * Move runtime example and usage docs into Rust Docs, `/// doc comment`, where they can be tested and kept up-to-date by tools like `cargo doc`.
 
 > Doc-comments and Doc-testing, `///` and `//!` in [Chapter 8 - Comments vs Documentation](./chapter_08.md)
+
+## 1.7 Use Declarations - "imports"
+
+Different languages have different ways of sorting their imports, in the Rust ecosystem the [standard way](https://github.com/rust-lang/rustfmt/issues/4107) is:
+
+- `std` (`core`, `alloc` would also fit here).
+- External crates (what is in your Cargo.toml `[dependencies]`).
+- Workspace crates (workspace member crates).
+- This module `super::`.
+- This module `crate::`.
+
+```rust
+// std
+use std::sync::Arc;
+
+// external crates
+use chrono::Utc;
+use juniper::{FieldError, FieldResult};
+use uuid::Uuid;
+
+// crate code lives in workspace
+use broker::database::PooledConnection;
+
+// super:: / crate::
+use super::schema::{Context, Payload};
+use super::update::convert_publish_payload;
+use crate::models::Event;
+```
+
+Some enterprise solutions opt to include their core packages after `std`, so all external packages that start with enterprise name are located before the others:
+
+```rust
+// std
+use std::sync::Arc;
+
+// enterprise external crates
+use enterprise_crate_name::some_module::SomeThing;
+
+// external crates
+use chrono::Utc;
+use juniper::{FieldError, FieldResult};
+use uuid::Uuid;
+
+// crate code lives in workspace
+use broker::database::PooledConnection;
+
+// super:: / crate::
+use super::schema::{Context, Payload};
+use super::update::convert_publish_payload;
+use crate::models::Event;
+```
+
+One way of not having to manually control this is using the following arguments in your `rustfmt.toml`:
+
+```toml
+reorder_imports = true
+imports_granularity = "Crate"
+group_imports = "One"
+```
+
+> As of Rust version 1.88, it is necessary to execute rustfmt in nightly to correctly reorder code `cargo +nightly fmt`.
