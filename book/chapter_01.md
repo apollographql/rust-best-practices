@@ -556,7 +556,7 @@ One way of not having to manually control this is using the following arguments 
 ```toml
 reorder_imports = true
 imports_granularity = "Crate"
-group_imports = "One"
+group_imports = "StdExternalCrate"
 ```
 
 > As of Rust version 1.88, it is necessary to execute rustfmt in nightly to correctly reorder code `cargo +nightly fmt`.
