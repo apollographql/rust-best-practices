@@ -6,9 +6,9 @@ Rust enforces a strict error handling approach, but *how* you handle them define
 
 ## 4.1 Prefer `Result`, avoid panic 🫨
 
-Rust has a powerful type that wraps wraps fallible data, [`Result`](https://doc.rust-lang.org/std/result/), this allows us to handle Error cases according to our needs and manage the state of the application based on that.
+Rust has a powerful type that wraps fallible data, [`Result`](https://doc.rust-lang.org/std/result/), this allows us to handle Error cases according to our needs and manage the state of the application based on that.
 
-* If you function can fail, prefer to return a `Result`:
+* If your function can fail, prefer to return a `Result`:
 ```rust
 fn divide(x: f64, y: f64) -> Result<f64, DivisionError> {
     if y == 0.0 {
@@ -118,7 +118,7 @@ Prefer using `?` over verbose alternatives like `match` chains:
 fn handle_request(req: &Request) -> Result<ValidatedRequest, RequestValidationError> {
     validate_headers(req)?;
     validate_body_format(req)?;
-    validate_validate_credentials(req)?;
+    validate_credentials(req)?;
     let body = Body::try_from(req)?;
 
     Ok(ValidatedRequest::try_from((req, body))?)
@@ -129,7 +129,7 @@ fn handle_request(req: &Request) -> Result<ValidatedRequest, RequestValidationEr
 
 ## 4.6 Unit Test should exercise errors
 
-While many errors don't implement PartialEq and Eq, making it had to do direct assertions between them, it is possible to check the error messages with `format!` or `to_string()`, making the errors meaningful and test validated:
+While many errors don't implement PartialEq and Eq, making it hard to do direct assertions between them, it is possible to check the error messages with `format!` or `to_string()`, making the errors meaningful and test validated:
 
 ```rust
 #[test]

@@ -124,14 +124,14 @@ mod test_thing_parser {
   fn lowercase_letters_are_valid() {
     assert!(
       Thing::parse("abcd").is_ok(),
-      // Works like `eprintln, format and println` macros 
+      // Works like `eprintln`, `format` and `println` macros
       "Thing parse error: {:?}", 
       Thing::parse("abcd").unwrap_err()
     );
   }
 
   #[test]
-  fn app_capital_letters_are_invalid() {
+  fn capital_letters_are_invalid() {
     assert!(Thing::parse("ABCD").is_err());
   }
 }
@@ -185,7 +185,7 @@ We will deep dive into docs at a later stage, so in this section we will just br
 
 ```rust
 /// Helper function that adds any two numeric values together.
-/// This functions reasons about which would be the correct type to parse based on the type 
+/// This function reasons about which would be the correct type to parse based on the type 
 /// and the size of the numeric value.
 /// 
 /// # Examples
