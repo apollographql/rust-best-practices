@@ -177,7 +177,7 @@ match self {
 
 * Use `let PATTERN = EXPRESSION else {  DIVERGING_CODE; }` when the divergent code doesn’t need to know about the failed pattern matches or doesn’t need extra computation:
 ```rust
-let Some(&DIrection::North) = self.direction.as_ref() else {
+let Some(&Direction::North) = self.direction.as_ref() else {
 	return Err(DirectionNotAvailable(self.direction));
 }
 ```
@@ -376,9 +376,9 @@ unsafe { std::ptr::copy_nonoverlapping(src, dst, len); }
 const THREE_HALVES: f32 = 1.5;
 fn q_rsqrt(number: f32 ) -> f32 {
 	let mut i: i32 = number.to_bits() as i32;
-I = 0x5F375A86_i32.wrapping_sub(i >> 1);
-let y: f32::from_bits(i as u32);
-Y * (THREE_HALVES - (number * 0.5 * y * y))
+i = 0x5F375A86_i32.wrapping_sub(i >> 1);
+let y = f32::from_bits(i as u32);
+y * (THREE_HALVES - (number * 0.5 * y * y))
 }
 ```
 

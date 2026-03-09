@@ -14,7 +14,7 @@
 ## 8.2 When to use comments
 
 Use `//` comments (double slashed) when something can't be expressed clearly in code, like:
-* **Safety Guarantees**, some of done can be better expressed with code conditionals.
+* **Safety Guarantees**, some of which can be better expressed with code conditionals.
 * Workarounds or **Optimizations**.
 * Legacy or **platform-specific** behaviors. Some of them can be expressed with `#[cfg(..)]`.
 * Links to **Design Docs** or **ADRs**.
@@ -52,7 +52,7 @@ fn compute(counter: &mut usize) {
 
 ### ❌ Too long or outdated
 ```rust
-// Originally written in 2028 for some now-defunt platform
+// Originally written in 2028 for some now-defunct platform
 ```
 
 ## 8.4 Don't Write Living Documentation (living comments)
@@ -83,7 +83,7 @@ fn save_user(&self) -> Result<(), MyError> {
         // serialize user data
         let data = serde_json::to_string(self)?;
         // write to file
-        std::fs::Write(self.path(), data)?;
+        std::fs::write(self.path(), data)?;
     }
 }
 
@@ -95,7 +95,7 @@ fn save_auth_user(&self) -> Result<PathBuf, MyError> {
     if self.is_authenticated() {
         let path = self.path();
         let serialized_user = serde_json::to_string(self)?;
-        std::fs::Write(path, serialized_user)?;
+        std::fs::write(path, serialized_user)?;
         Ok(path)
     } else {
         Err(MyError::UserNotAuthenticated)
@@ -106,7 +106,7 @@ fn save_auth_user(&self) -> Result<PathBuf, MyError> {
 ## 8.6 `TODO` should become issues
 
 Don't leave `// TODO:` scattered around the codebase with no owner. Instead:
-1. File Github Issue or Jira Ticker. (Prefer github issues on public repositories).
+1. File Github Issue or Jira Ticket. (Prefer github issues on public repositories).
 2. Reference the issue in the code:
 
 ```rust

@@ -6,7 +6,7 @@ Clippy documentation can be found [here](https://doc.rust-lang.org/clippy/usage.
 
 ## 2.1 Why care about linting?
 
-Rust compiler is a powerful tool that catches many mistakes. However, some more in-depth analysis require extra tools, that is where `cargo clippy` clippy comes into to play. Clippy check for:
+Rust compiler is a powerful tool that catches many mistakes. However, some more in-depth analysis require extra tools, that is where `cargo clippy` clippy comes into to play. Clippy checks for:
 * Performance pitfalls.
 * Style issues.
 * Redundant code.
@@ -43,7 +43,7 @@ Potential additions elements to add:
 | `redundant_clone` | Detects unnecessary `clones`, has performance impact | [link (nursery + perf)](https://rust-lang.github.io/rust-clippy/master/#redundant_clone) |
 | `needless_borrow` group | Removes redundant `&` borrowing | [link (style)](https://rust-lang.github.io/rust-clippy/master/#needless_borrow) |
 | `map_unwrap_or` / `map_or` | Simplifies nested `Option/Result` handling | [`map_unwrap_or`](https://rust-lang.github.io/rust-clippy/master/#map_unwrap_or) [`unnecessary_map_or`](https://rust-lang.github.io/rust-clippy/master/#unnecessary_map_or) [`unnecessary_result_map_or_else`](https://rust-lang.github.io/rust-clippy/master/#unnecessary_result_map_or_else) |
-| `manual_ok_or` | Suggest using `.ok_or_else` instead o `match` | [link (style)](https://rust-lang.github.io/rust-clippy/master/#manual_ok_or) |
+| `manual_ok_or` | Suggest using `.ok_or_else` instead of `match` | [link (style)](https://rust-lang.github.io/rust-clippy/master/#manual_ok_or) |
 | `large_enum_variant` | Warns if an enum has very large variant which is bad for memory. Suggests `Boxing` it | [link (perf)](https://rust-lang.github.io/rust-clippy/master/#large_enum_variant) |
 | `unnecessary_wraps` | If your function always returns `Some` or `Ok`, you don't need `Option`/`Result` | [link (pedantic)](https://rust-lang.github.io/rust-clippy/master/#unnecessary_wraps) |
 | `clone_on_copy` | Catches accidental `.clone()` on `Copy` types like `u32` and `bool` | [link (complexity)](https://rust-lang.github.io/rust-clippy/master/#clone_on_copy) |
@@ -54,7 +54,7 @@ Potential additions elements to add:
 **NEVER** just `#[allow(clippy::lint_something)]` unless:
 
 * You **truly understand** why the warning happens and you have a reason why it is better that way.
-* You **document* why it is being ignored.
+* You **document** why it is being ignored.
 * ❗ Don't use `allow`, but `expect`, it will give a warning in case the lint is not true anymore, `#[expect(clippy::lint_something)]`.
 
 ### Example:
@@ -81,7 +81,7 @@ enum Message {
 
 ### Handling false positives
 
-Sometimes Clippy complains even when your code is correct, in those cases there are to solutions:
+Sometimes Clippy complains even when your code is correct, in those cases there are two solutions:
 1. Try to refactor the code, so it improves the warning.
 2. **Locally** override the lint with `#[expect(clippy::lint_name)]` and a comment with the reason.
 3. Avoid global overrides, unless it is core crate issue, a good example of this is the Bevy Engine that has a set of lints that should be allowed by default.
