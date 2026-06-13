@@ -1,0 +1,5 @@
+version: 1
+interface:
+  display_name: Rust Code Review
+  short_description: Rust Code review checklist and decision framework for Rust PRs, derived from rust-best-practices
+  default_prompt: Review repository for rules defined in .codex\rules\rust_programming.mdc
