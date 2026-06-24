@@ -76,6 +76,7 @@ let new_num = increment(num); // `num` still usable after this point
 * All fields are `Copy` themselves.
 * The struct is `small`, up to 2 (maybe 3) words of memory or 24 bytes (each word is 64 bits/8bytes).
 * The struct **represents a “plain data object”**, without resourcing to ownership (no heap allocations. Example: `Vec` and `Strings`).
+* ❗**The type does not also implement `Iterator`.** Even if every field is `Copy`, never put `Copy` and `Iterator` on the same type (see [§1.5](#15-iterator-iter-vs-for)).
 
 ❗**Rust Arrays are stack allocated.** Which means they can be copied if their underlying type is `Copy`, but this will be allocated in the program stack which can easily become a stack overflow. More on [Chapter 3 - Stack vs Heap](https://github.com/apollographql/rust-best-practices/blob/main/book/chapter_03.md#33-stack-vs-heap-be-size-smart)
 
@@ -352,6 +353,7 @@ for value in vec.iter().enumerate()
 * Avoid needlessly collect/allocate of a collection (e.g. vector) just to throw it away later by some larger operation or by another iteration.
 * Prefer `iter` over `into_iter` unless you don't need the ownership of the collection.
 * Prefer `iter` over `into_iter` for collections that inner type implements `Copy`, e.g. `Vec<T: Copy>`.
+* **Never implement (or derive) both `Copy` and `Iterator` on the same type.** Copying an iterator and advancing one copy leaves the other untouched, which silently yields wrong results — it is a well-known footgun. The standard library hit exactly this: it is why `Range` historically could not be `Copy`, and why the new `core::range` types (stabilized in Rust 1.96) implement `IntoIterator` instead of `Iterator` so they *can* be `Copy`. If you need an iterator on a `Copy` type, implement `IntoIterator` and return a separate iterator struct.
 * For summing numbers prefer `.sum` over `.fold`. `.sum` is specialized for summing values, so the compiler knows it can make optimizations on that front, while fold has a blackbox closure that needs to be applied at every step. If you need to sum by an initial value, just added in the expression `let my_sum = [1, 2, 3].sum() + 3`.
 
 ## 1.6 Comments: Context, not Clutter
