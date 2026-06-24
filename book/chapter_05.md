@@ -282,9 +282,15 @@ Rust comes with 2 macros to make assertions:
 
 ### 🚨 `assert!` reminders
 * Rust asserts support formatted strings, like the previous examples, those strings will be printed in case of failure, so it is a good practice to add what the actual state was and how it differs from the expected.
-* If you don't care about the exact pattern matching value, using `matches!` combined with `assert!` might be a good alternative.
+* If you don't care about the exact pattern matching value, using `matches!` combined with `assert!` might be a good alternative. Note the message string is an argument to `assert!`, not to `matches!`:
 ```rust
-assert!(matches!(error, MyError::BadInput(_), "Expected `BadInput`, found {error}"));
+assert!(matches!(error, MyError::BadInput(_)), "Expected `BadInput`, found {error}");
+```
+* Since Rust 1.96 prefer the stabilized [`assert_matches!`](https://doc.rust-lang.org/std/macro.assert_matches.html) (and [`debug_assert_matches!`](https://doc.rust-lang.org/std/macro.debug_assert_matches.html)) over `assert!(matches!(..))`. It prints the actual value on failure for free, so you don't have to write the message yourself:
+```rust
+use std::assert_matches::assert_matches;
+
+assert_matches!(error, MyError::BadInput(_));
 ```
 * Use `#[should_panic]` wisely. It should only be used when panic is the desired behavior, prefer result instead of panic.
 * There are some other that can enhance your testing experience like:
