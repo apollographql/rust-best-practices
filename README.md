@@ -15,6 +15,7 @@ As another source of reference, the Rust Analyzer Style Guide should also be use
     - [Iterator, `.iter` vs `for`](https://github.com/apollographql/rust-best-practices/blob/main/book/chapter_01.md#15-iterator-iter-vs-for)
     - [Comments: Context, not Clutter](https://github.com/apollographql/rust-best-practices/blob/main/book/chapter_01.md#16-comments-context-not-clutter)
     - [Use Declarations - "imports"](https://github.com/apollographql/rust-best-practices/blob/main/book/chapter_01.md#17-use-declarations---imports)
+    - [When to Extract a Function (and When Not To)](https://github.com/apollographql/rust-best-practices/blob/main/book/chapter_01.md#18-when-to-extract-a-function-and-when-not-to)
 - [Chapter 2 - Clippy and Linting Discipline](https://github.com/apollographql/rust-best-practices/blob/main/book/chapter_02.md)
     - [Why care about linting?](https://github.com/apollographql/rust-best-practices/blob/main/book/chapter_02.md#21-why-care-about-linting)
     - [Always run `cargo clippy`](https://github.com/apollographql/rust-best-practices/blob/main/book/chapter_02.md#22-always-run-cargo-clippy)

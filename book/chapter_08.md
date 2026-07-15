@@ -103,6 +103,8 @@ fn save_auth_user(&self) -> Result<PathBuf, MyError> {
 }
 ```
 
+> ❗ Extract when the **name adds meaning** — not to deduplicate a couple of similar-looking lines. See [Chapter 1, §1.8](chapter_01.md#18-when-to-extract-a-function-and-when-not-to) for when duplication is the better trade-off.
+
 ## 8.6 `TODO` should become issues
 
 Don't leave `// TODO:` scattered around the codebase with no owner. Instead:
