@@ -174,6 +174,8 @@ fn the_function_accepts_all_strings_with_a(#[case] input: &str) {
 > * It’s harder for both IDEs and humans to run/locate specific tests.
 > * Expectation vs condition naming is now visually inverted (expectation first).
 
+> ❗ Share **setup**, not the test itself: keep each test's action and assertion inline, even when repetitive. Tests tolerate duplication better than production code — see [Chapter 1, §1.8](chapter_01.md#-test-code-readability-beats-dry).
+
 ## 5.2 Add Test Examples to your Docs
 
 We will deep dive into docs at a later stage, so in this section we will just briefly go over how to add tests to you docs. Rustdoc can turn examples into executable tests using `///` with a few advantages:

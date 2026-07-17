@@ -642,4 +642,16 @@ If you find yourself maintaining an abstraction like `write_entry`, [Sandi Metz'
 * The only motivation is **line count**. A single-caller helper pays off when its *name* clarifies intent ([§1.6](#-breaking-up-long-functions-over-commenting-them), [§8.5](chapter_08.md#85-replace-comments-with-code)) — not when it merely relocates code.
 * You are **guessing** at a future abstraction. Wait for the third usage to reveal its real shape.
 
+### 🧫 Test code: readability beats DRY
+
+In tests, be **even more tolerant of duplication**. The Google Testing Blog calls this [DAMP — "Descriptive And Meaningful Phrases"](https://testing.googleblog.com/2019/12/testing-on-toilet-tests-too-dry-make.html) ([*Software Engineering at Google*, ch. 12](https://abseil.io/resources/swe-book/html/ch12.html)): each test should read as a **self-contained story** — setup, action, assertion — without the reader chasing helpers to reconstruct what actually happened.
+
+* **Tests have no tests.** Logic moved into a shared helper (loops, branches, clever parametrization) is itself untested — a bug there silently weakens every test built on it.
+* **A failing test should be diagnosable on sight.** The reader is usually debugging a broken build; make the expected behavior visible in the test body, not three helpers away.
+* **Shared test helpers couple unrelated tests.** Change one behavior and dozens of tests fail at once — for the helper's sake, not the behavior's.
+
+Where to draw the line:
+* ✅ Share **setup and fixtures** — a shared setup function or `rstest` cases, as [Chapter 5](chapter_05.md#51-tests-as-living-documentation) recommends. Constructing a test server twice is boilerplate, not knowledge.
+* ❌ Keep each test's **action and assertion inline**, even when they look repetitive across tests.
+
 > 🚨 When in doubt, **prefer duplication**. A duplicated line is trivially fixed later; a wrong abstraction accretes parameters and conditionals, because each maintainer keeps patching it instead of undoing it.
