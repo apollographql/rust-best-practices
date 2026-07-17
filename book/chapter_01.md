@@ -583,6 +583,10 @@ Two occurrences of a couple of lines are usually **fine**. Wait for the third be
 
 [DRY](https://en.wikipedia.org/wiki/Don%27t_repeat_yourself) (*The Pragmatic Programmer*) says every piece of **knowledge** should have a single representation. It does **not** say "no two code fragments may look alike". Two blocks that *happen* to look the same today, but represent **different decisions**, will evolve in different directions. Forcing them into one helper couples code that should be free to diverge — this is **coincidental duplication**, and deduplicating it is how wrong abstractions are born.
 
+### 🧪 Examples
+
+How these principles play out in code:
+
 #### ✅ Coincidental duplication — leave it inline:
 ```rust
 // Similar-looking lines, but the `.env` and `.toml` formats are
@@ -604,7 +608,7 @@ fn write_entry(out: &mut impl Write, key: &str, value: &str, quoted: bool) -> io
 }
 ```
 
-Every new variant will grow another parameter or branch. If you find an abstraction like this, [Sandi Metz's advice](https://sandimetz.com/blog/2016/1/20/the-wrong-abstraction) is to **re-inline the helper into its callers**, let the duplication reappear, and only then re-derive the right abstraction — if one exists at all.
+Every new variant will grow another parameter or branch. And the `bool` is a smell in its own right: `write_entry(out, key, value, true)` tells the reader nothing at the call site — Martin Fowler calls this a [Flag Argument](https://martinfowler.com/bliki/FlagArgument.html). When a mode selector is genuinely warranted, a two-variant enum (`Quoting::Quoted`) keeps call sites readable, and Clippy's [`fn_params_excessive_bools`](https://rust-lang.github.io/rust-clippy/master/index.html#fn_params_excessive_bools) lints against accumulating them. No enum rescues *this* design, though: its variants would exist only to encode the callers' differences.
 
 #### ✅ Shared knowledge — extract it:
 ```rust
@@ -614,6 +618,17 @@ fn is_retryable(status: StatusCode) -> bool {
     status == StatusCode::TOO_MANY_REQUESTS || status.is_server_error()
 }
 ```
+
+### 🔧 Unwinding a wrong abstraction
+
+If you find yourself maintaining an abstraction like `write_entry`, [Sandi Metz's advice](https://sandimetz.com/blog/2016/1/20/the-wrong-abstraction) is to **unwind it, not patch it**:
+
+1. **Re-inline** the helper's body into every caller, substituting each call site's concrete arguments.
+2. **Reduce** each call site — with the parameters now literal, dead branches and unused generality fall away.
+3. **Reevaluate** what the callers *actually* share, now that every one of them is explicit.
+4. **Reconstruct** one or more abstractions from what remains — or none, if the sharing turns out to be coincidental.
+
+> 🤖 Doing this by hand is tedious, which is why wrong abstractions survive on sunk cost. For an AI coding agent, unwinding is fast, mechanical work — ask for it explicitly instead of letting the agent keep patching a helper that fights back.
 
 ### ✅ Extract a function when:
 * The logic appears in **3+ places** *and* represents the **same decision** (Rule of Three).
