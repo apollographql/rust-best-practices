@@ -471,6 +471,8 @@ mod tests {
 
 Let **structure** and **naming** replace commentary, and enhance its documentation with **tests as living documentation**.
 
+> ❗ Splitting is about **naming and clarity**, not deduplication. Before extracting a helper to remove *duplicated* lines, check [§1.8](#18-when-to-extract-a-function-and-when-not-to).
+
 ### 📝 TODOs are not comments - track them properly
 
 Avoid leaving lingering `// TODO: Lorem Ipsum` comments in the code. Instead:
@@ -562,3 +564,94 @@ group_imports = "StdExternalCrate"
 ```
 
 > As of Rust version 1.88, it is necessary to execute rustfmt in nightly to correctly reorder code `cargo +nightly fmt`.
+
+## 1.8 When to Extract a Function (and When Not To)
+
+This chapter ([§1.6](#-breaking-up-long-functions-over-commenting-them)) and [Chapter 8](chapter_08.md#85-replace-comments-with-code) recommend splitting long functions and replacing narrative comments with named helpers. That advice is about **naming and clarity** — it is *not* a license to hunt down every repeated line. Extraction has a cost: every helper adds indirection, and a **wrong abstraction is much harder to remove than a little duplication**.
+
+> "Duplication is far cheaper than the wrong abstraction." — [Sandi Metz, The Wrong Abstraction](https://sandimetz.com/blog/2016/1/20/the-wrong-abstraction)
+
+### 📏 The Rule of Three
+
+From [Martin Fowler's *Refactoring*](https://martinfowler.com/books/refactoring.html), attributed to Don Roberts:
+
+> The first time you do something, you just do it. The second time you do something similar, you wince at the duplication, but you do the duplicate thing anyway. The third time you do something similar, you refactor.
+
+Two occurrences of a couple of lines are usually **fine**. Wait for the third before reaching for a helper — by then you will know what the abstraction actually *is*, instead of guessing at it.
+
+### 🧠 DRY is about knowledge, not text
+
+[DRY](https://en.wikipedia.org/wiki/Don%27t_repeat_yourself) (*The Pragmatic Programmer*) says every piece of **knowledge** should have a single representation. It does **not** say "no two code fragments may look alike". Two blocks that *happen* to look the same today, but represent **different decisions**, will evolve in different directions. Forcing them into one helper couples code that should be free to diverge — this is **coincidental duplication**, and deduplicating it is how wrong abstractions are born.
+
+### 🧪 Examples
+
+How these principles play out in code:
+
+#### ✅ Coincidental duplication — leave it inline:
+```rust
+// Similar-looking lines, but the `.env` and `.toml` formats are
+// unrelated decisions that will evolve independently:
+writeln!(env_file, "{key}={value}")?;
+// ... elsewhere ...
+writeln!(toml_file, "{key} = \"{value}\"")?;
+```
+
+#### ❌ Deduplicating it forces a flag parameter — the classic smell:
+```rust
+// One helper, two behaviors, and a `bool` to pick between them:
+fn write_entry(out: &mut impl Write, key: &str, value: &str, quoted: bool) -> io::Result<()> {
+    if quoted {
+        writeln!(out, "{key} = \"{value}\"")
+    } else {
+        writeln!(out, "{key}={value}")
+    }
+}
+```
+
+Every new variant will grow another parameter or branch. And the `bool` is a smell in its own right: `write_entry(out, key, value, true)` tells the reader nothing at the call site — Martin Fowler calls this a [Flag Argument](https://martinfowler.com/bliki/FlagArgument.html). When a mode selector is genuinely warranted, a two-variant enum (`Quoting::Quoted`) keeps call sites readable, and Clippy's [`fn_params_excessive_bools`](https://rust-lang.github.io/rust-clippy/master/index.html#fn_params_excessive_bools) lints against accumulating them. No enum rescues *this* design, though: its variants would exist only to encode the callers' differences.
+
+#### ✅ Shared knowledge — extract it:
+```rust
+// The definition of "retryable" is ONE business decision used in many
+// places. If it changes, it must change everywhere at once:
+fn is_retryable(status: StatusCode) -> bool {
+    status == StatusCode::TOO_MANY_REQUESTS || status.is_server_error()
+}
+```
+
+### 🔧 Unwinding a wrong abstraction
+
+If you find yourself maintaining an abstraction like `write_entry`, [Sandi Metz's advice](https://sandimetz.com/blog/2016/1/20/the-wrong-abstraction) is to **unwind it, not patch it**:
+
+1. **Re-inline** the helper's body into every caller, substituting each call site's concrete arguments.
+2. **Reduce** each call site — with the parameters now literal, dead branches and unused generality fall away.
+3. **Reevaluate** what the callers *actually* share, now that every one of them is explicit.
+4. **Reconstruct** one or more abstractions from what remains — or none, if the sharing turns out to be coincidental.
+
+> 🤖 Doing this by hand is tedious, which is why wrong abstractions survive on sunk cost. For an AI coding agent, unwinding is fast, mechanical work — ask for it explicitly instead of letting the agent keep patching a helper that fights back.
+
+### ✅ Extract a function when:
+* The logic appears in **3+ places** *and* represents the **same decision** (Rule of Three).
+* The name **adds meaning** the code alone does not (`is_retryable`, `authorize`) — rather than restating it (`add_one_to_counter`).
+* It produces a **unit worth testing** in isolation (see [§1.6](#-breaking-up-long-functions-over-commenting-them)).
+* It hides genuine complexity behind a **small, honest signature** — few parameters, no flags.
+
+### ❌ Don't extract when:
+* It is **1–2 lines used in fewer than 3 places** — the helper is pure indirection.
+* The call sites are only *almost* identical, and unifying them requires **flag parameters** or extra branches.
+* The only motivation is **line count**. A single-caller helper pays off when its *name* clarifies intent ([§1.6](#-breaking-up-long-functions-over-commenting-them), [§8.5](chapter_08.md#85-replace-comments-with-code)) — not when it merely relocates code.
+* You are **guessing** at a future abstraction. Wait for the third usage to reveal its real shape.
+
+### 🧫 Test code: readability beats DRY
+
+In tests, be **even more tolerant of duplication**. The Google Testing Blog calls this [DAMP — "Descriptive And Meaningful Phrases"](https://testing.googleblog.com/2019/12/testing-on-toilet-tests-too-dry-make.html) ([*Software Engineering at Google*, ch. 12](https://abseil.io/resources/swe-book/html/ch12.html)): each test should read as a **self-contained story** — setup, action, assertion — without the reader chasing helpers to reconstruct what actually happened.
+
+* **Tests have no tests.** Logic moved into a shared helper (loops, branches, clever parametrization) is itself untested — a bug there silently weakens every test built on it.
+* **A failing test should be diagnosable on sight.** The reader is usually debugging a broken build; make the expected behavior visible in the test body, not three helpers away.
+* **Shared test helpers couple unrelated tests.** Change one behavior and dozens of tests fail at once — for the helper's sake, not the behavior's.
+
+Where to draw the line:
+* ✅ Share **setup and fixtures** — a shared setup function or `rstest` cases, as [Chapter 5](chapter_05.md#51-tests-as-living-documentation) recommends. Constructing a test server twice is boilerplate, not knowledge.
+* ❌ Keep each test's **action and assertion inline**, even when they look repetitive across tests.
+
+> 🚨 When in doubt, **prefer duplication**. A duplicated line is trivially fixed later; a wrong abstraction accretes parameters and conditionals, because each maintainer keeps patching it instead of undoing it.
