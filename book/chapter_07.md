@@ -1,6 +1,6 @@
 # Chapter 7 - Type State Pattern
 
-Models state at compile time, preventing bugs by making illegal states unrepresentable. It takes advantage of the Rust generics and type system to create sub-types that can only be reached if a certain condition is achieved, making some operations illegal at compile time. 
+Models state at compile time, preventing bugs by making illegal states unrepresentable. It takes advantage of the Rust generics and type system to create sub-types that can only be reached if a certain condition is achieved, making some operations illegal at compile time.
 
 > Recently it became the standard design pattern of Rust programming. However, it is not exclusive to Rust, as it is achievable and has inspired other languages to do the same [swift](https://swiftology.io/articles/typestate/) and [typescript](https://catchts.com/type-state).
 
@@ -34,7 +34,7 @@ struct File<State> {
     /// Open `File` handler
     handle: Option<std::fs::File>,
     /// Type state manager
-    _state: std::marker::PhantomData<State> 
+    _state: std::marker::PhantomData<State>
 }
 
 impl File<FileNotOpened> {
@@ -157,6 +157,10 @@ let person: Person = Builder::new().age(30).email("myself@email.com".to_string()
 let person: Person = Builder::new().age(10).age(15); // ❌ Compile error:  Age was already set
 let person: Person = Builder::new().build();// ❌ Compile error:  Name and Age required to `build`
 ```
+
+### Crates implementing Builder pattern
+
+Some libraries are already implementing the builder pattern, like [bon-rs](https://docs.rs/bon/latest/bon/)
 
 ### Network Protocol State Machine
 
