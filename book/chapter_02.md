@@ -18,11 +18,11 @@ Rust compiler is a powerful tool that catches many mistakes. However, some more 
 Add the following to your daily workflow:
 
 ```shell
-$ cargo clippy --all-targets --all-feature --locked -- -D warnings
+$ cargo clippy --all-targets --all-features --locked -- -D warnings
 ```
 
 * `--all-targets`: checks library, tests, benches and examples.
-* `--all-feature`: checks code for all features enabled, auto solves conflicting features.
+* `--all-features`: checks code with all features enabled; it does not auto-solve conflicting features.
 * `--locked`: Requires `Cargo.lock` to be up-to-date, can be solved with `$ cargo update`.
 * `-D warnings`: treats warnings as errors
 
