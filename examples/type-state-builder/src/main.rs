@@ -1,10 +1,8 @@
 #![allow(dead_code)]
 use std::marker::PhantomData;
 
-struct MissingName;
-struct NameSet;
-struct MissingAge;
-struct AgeSet;
+struct Unset;
+struct Set;
 
 #[derive(Debug)]
 struct Person {
@@ -13,81 +11,58 @@ struct Person {
     email: Option<String>,
 }
 
-struct Builder<HasName, HasAge> {
+struct Builder<NameState = Unset, AgeState = Unset> {
     name: Option<String>,
     age: u8,
     email: Option<String>,
-    _name_marker: PhantomData<HasName>,
-    _age_marker: PhantomData<HasAge>,
+    _maker_state: PhantomData<(NameState, AgeState)>,
 }
 
-impl Builder<MissingName, MissingAge> {
+impl Builder<Unset, Unset> {
     const fn new() -> Self {
         Self {
             name: None,
             age: 0,
-            _name_marker: PhantomData,
-            _age_marker: PhantomData,
             email: None,
+            _maker_state: PhantomData,
         }
     }
+}
 
-    fn name(self, name: String) -> Builder<NameSet, MissingAge> {
+impl<NameState> Builder<NameState, Unset> {
+    fn age(self, age: u8) -> Builder<NameState, Set> {
+        Builder {
+            age,
+            name: self.name,
+            email: self.email,
+            _maker_state: PhantomData,
+        }
+    }
+}
+
+impl<AgeState> Builder<Unset, AgeState> {
+    fn name(self, name: String) -> Builder<Set, AgeState> {
         Builder {
             name: Some(name),
-            _name_marker: PhantomData::<NameSet>,
             age: self.age,
-            _age_marker: PhantomData,
-            email: None,
-        }
-    }
-
-    fn age(self, age: u8) -> Builder<MissingName, AgeSet> {
-        Builder {
-            age,
-            _age_marker: PhantomData::<AgeSet>,
-            name: None,
-            _name_marker: PhantomData,
-            email: None,
+            email: self.email,
+            _maker_state: PhantomData,
         }
     }
 }
 
-impl Builder<NameSet, MissingAge> {
-    fn age(self, age: u8) -> Builder<NameSet, AgeSet> {
-        Builder {
-            age,
-            _age_marker: PhantomData::<AgeSet>,
-            name: self.name,
-            _name_marker: PhantomData::<NameSet>,
-            email: None,
-        }
-    }
-}
-
-impl Builder<MissingName, AgeSet> {
+impl<NameState, AgeState> Builder<NameState, AgeState> {
     fn email(self, email: String) -> Self {
         Self {
             name: self.name,
             age: self.age,
             email: Some(email),
-            _name_marker: self._name_marker,
-            _age_marker: self._age_marker,
-        }
-    }
-
-    fn name(self, name: String) -> Builder<NameSet, AgeSet> {
-        Builder {
-            name: Some(name),
-            _name_marker: PhantomData::<NameSet>,
-            age: self.age,
-            _age_marker: PhantomData::<AgeSet>,
-            email: self.email,
+            _maker_state: PhantomData,
         }
     }
 }
 
-impl Builder<NameSet, AgeSet> {
+impl Builder<Set, Set> {
     fn build(self) -> Person {
         Person {
             name: self
