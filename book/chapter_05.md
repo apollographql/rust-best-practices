@@ -12,7 +12,7 @@ In Rust, as in many other languages, tests often show how the functions are mean
 ### Use descriptive names
 
 > In the unit test name we should see the following:
-> * `unit_of_work`: which *function* we are calling. The **action** that will be executed. This is often be the name of the the test `mod` where the function is being tested.
+> * `unit_of_work`: which *function* we are calling. The **action** that will be executed. This is often the name of the test `mod` where the function is being tested.
 ```rust
 #[cfg(test)] 
 mod test { 
@@ -33,7 +33,7 @@ fn test_add_happy_path() {
 }
 ```
 #### ✅ Use a name which reads like a sentence, describing the desired behavior
-> Alternatively, if you function has too many tests, you can blob them together in a `mod`, it makes it easier to read and navigate.
+> Alternatively, if your function has too many tests, you can blob them together in a `mod`, it makes it easier to read and navigate.
 
 ```rust
 // OPTION 1
@@ -178,7 +178,7 @@ fn the_function_accepts_all_strings_with_a(#[case] input: &str) {
 
 ## 5.2 Add Test Examples to your Docs
 
-We will deep dive into docs at a later stage, so in this section we will just briefly go over how to add tests to you docs. Rustdoc can turn examples into executable tests using `///` with a few advantages:
+We will deep dive into docs at a later stage, so in this section we will just briefly go over how to add tests to your docs. Rustdoc can turn examples into executable tests using `///` with a few advantages:
 
 * These tests run with `cargo test` **BUT NOT** `cargo nextest run`. If using `nextest`, make sure to run `cargo t --doc` separately.
 * They serve both as documentation and correctness checks, and are kept up to date by changes, due to the fact that the compiler checks them.

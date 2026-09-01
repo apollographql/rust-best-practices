@@ -133,7 +133,7 @@ impl<NameState, AgeState> Builder<NameState, AgeState> {
 impl Builder<Set, Set> {
     fn build(self) -> Person {
         Person {
-            name: self.name.unwrap_or_else(|| unreachable!("Name is guarantee to be set")),
+            name: self.name.unwrap_or_else(|| unreachable!("Name is guaranteed to be set")),
             age: self.age,
             email: self.email,
         }
@@ -190,7 +190,7 @@ impl Client<Connected> {
     fn send(&mut self, msg: &str) {
         use std::io::Write;
         let Some(stream) = self.stream.as_mut() else {
-            unreachable!("Stream is guarantee to be set");
+            unreachable!("Stream is guaranteed to be set");
         };
         stream.write_all(msg.as_bytes())
     }
@@ -200,10 +200,10 @@ impl Client<Connected> {
 ## 7.5 Pros and Cons
 
 ### ✅ Use Type-State Pattern When:
-* Your want **compile-time state safety**.
+* You want **compile-time state safety**.
 * You need to enforce **API constraints**.
-* You are writing a library/crate that is heavy dependent on variants.
-* Your want to replace runtime booleans or enums with **type-safe code paths**.
+* You are writing a library/crate that is heavily dependent on variants.
+* You want to replace runtime booleans or enums with **type-safe code paths**.
 * You need compile time correctness.
 
 ### ❌ Avoid it when:
@@ -216,7 +216,7 @@ impl Client<Connected> {
 * Can lead to more **verbose solutions**.
 * Can lead to **complex type signatures**.
 * May require **unsafe** to return **variant outputs** based on different states.
-* May required a bunch of duplication (e.g. same struct field reused).
+* May require a bunch of duplication (e.g. same struct field reused).
 * PhantomData is not intuitive for beginners and can feel a bit hacky.
 
 > Use this pattern when it **saves bugs, increases safety or simplifies logic**, not just for cleverness.

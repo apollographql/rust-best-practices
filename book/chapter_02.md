@@ -6,7 +6,7 @@ Clippy documentation can be found [here](https://doc.rust-lang.org/clippy/usage.
 
 ## 2.1 Why care about linting?
 
-Rust compiler is a powerful tool that catches many mistakes. However, some more in-depth analysis require extra tools, that is where `cargo clippy` clippy comes into to play. Clippy checks for:
+Rust compiler is a powerful tool that catches many mistakes. However, some more in-depth analysis require extra tools, that is where `cargo clippy` comes into play. Clippy checks for:
 * Performance pitfalls.
 * Style issues.
 * Redundant code.
@@ -26,7 +26,7 @@ $ cargo clippy --all-targets --all-features --locked -- -D warnings
 * `--locked`: Requires `Cargo.lock` to be up-to-date, can be solved with `$ cargo update`.
 * `-D warnings`: treats warnings as errors
 
-Potential additions elements to add:
+Potential additional elements to add:
 
 * `-- -W clippy::pedantic`: lints which are rather strict or have occasional false positives.
 * `-- -W clippy::nursery`: Optionally can be added to check for new lints that are still under development.
