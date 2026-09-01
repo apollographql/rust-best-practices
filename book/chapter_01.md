@@ -75,7 +75,7 @@ let new_num = increment(num); // `num` still usable after this point
 * When to consider declaring `Copy` on your own types:
 * All fields are `Copy` themselves.
 * The struct is `small`, up to 2 (maybe 3) words of memory or 24 bytes (each word is 64 bits/8bytes).
-* The struct **represents a “plain data object”**, without resourcing to ownership (no heap allocations. Example: `Vec` and `Strings`).
+* The struct **represents a “plain data object”**, without resorting to ownership (no heap allocations. Example: `Vec` and `Strings`).
 * ❗**The type does not also implement `Iterator`.** Even if every field is `Copy`, never put `Copy` and `Iterator` on the same type (see [§1.5](#15-iterator-iter-vs-for)).
 
 ❗**Rust Arrays are stack allocated.** Which means they can be copied if their underlying type is `Copy`, but this will be allocated in the program stack which can easily become a stack overflow. More on [Chapter 3 - Stack vs Heap](https://github.com/apollographql/rust-best-practices/blob/main/book/chapter_03.md#33-stack-vs-heap-be-size-smart)
@@ -147,7 +147,7 @@ enum Direction {
 ## 1.3 Handling `Option<T>` and `Result<T, E>`
 Rust 1.65 introduced a better way to safely unpack Option and Result types with the `let Some(x) = … else { … }` or `let Ok(x) = … else { … }` when you have a default `return` value, `continue` or `break` default else case. It allows early returns when the missing case is **expected and normal**, not exceptional.
 
-### ✅ Cases to use each pattern matching for Option and Return
+### ✅ Cases to use each pattern matching for Option and Result
 * Use `match` when you want to pattern match against the inner types `T` and `E`
 ```rust
 match self {
@@ -203,7 +203,7 @@ if let Some(x) = self.next() {
 
 ❗**If you don’t care about the value of the `Err` case, please use `?` to propagate the `Err` to the caller.**
 
-### ❌ Bad Option/Return pattern matching:
+### ❌ Bad Option/Result pattern matching:
 
 * Conversion between Result and Option (prefer `.ok()`,`.ok_or()`, and `ok_or_else()`)
 ```rust
@@ -354,11 +354,11 @@ for value in vec.iter().enumerate()
 * Prefer `iter` over `into_iter` unless you don't need the ownership of the collection.
 * Prefer `iter` over `into_iter` for collections that inner type implements `Copy`, e.g. `Vec<T: Copy>`.
 * **Never implement (or derive) both `Copy` and `Iterator` on the same type.** Copying an iterator and advancing one copy leaves the other untouched, which silently yields wrong results — it is a well-known footgun. The standard library hit exactly this: it is why `Range` historically could not be `Copy`, and why the new `core::range` types (stabilized in Rust 1.96) implement `IntoIterator` instead of `Iterator` so they *can* be `Copy`. If you need an iterator on a `Copy` type, implement `IntoIterator` and return a separate iterator struct.
-* For summing numbers prefer `.sum` over `.fold`. `.sum` is specialized for summing values, so the compiler knows it can make optimizations on that front, while fold has a blackbox closure that needs to be applied at every step. If you need to sum by an initial value, just added in the expression `let my_sum = [1, 2, 3].sum() + 3`.
+* For summing numbers prefer `.sum` over `.fold`. `.sum` is specialized for summing values, so the compiler knows it can make optimizations on that front, while fold has a blackbox closure that needs to be applied at every step. If you need to sum by an initial value, just add it in the expression `let my_sum = [1, 2, 3].sum() + 3`.
 
 ## 1.6 Comments: Context, not Clutter
 
-> "Context are for why, not what or how"
+> "Comments are for why, not what or how"
 
 Well-written Rust code, with expressive types and good naming, often speaks for itself. Many high-quality codebases thrive on **few or no comments**. And that's a good thing.
 
@@ -492,7 +492,7 @@ There are a few gotchas when calling comments "living documentation":
 * Context changes.
 * Comments get stale.
 * Many large comments make people avoid reading them.
-* Team becomes fearful of delete irrelevant comments.
+* Team becomes fearful of deleting irrelevant comments.
 
 If you find a comment, **don't trust it blindly**. Read it in context. If it's wrong or outdated, fix or remove it. A misleading comment is worse than no comments at all. 
 

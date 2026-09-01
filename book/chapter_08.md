@@ -158,7 +158,7 @@ Rust provides **first-class documentation tooling** via rustdoc, which makes doc
 | Lint      	| Description                               	|
 |--------------	|-------------------------------------------	|
 | [missing_docs](https://doc.rust-lang.org/rustdoc/lints.html#missing_docs) 	| Warns that a public functions, struct, const, enum has missing documentation           	|
-| [broken_intra_doc_links](https://doc.rust-lang.org/rustdoc/lints.html#broken_intra_doc_links) 	| Detects if an internal documentation link is broken. Specially useful when things are renamed.                                	|
+| [broken_intra_doc_links](https://doc.rust-lang.org/rustdoc/lints.html#broken_intra_doc_links) 	| Detects if an internal documentation link is broken. Especially useful when things are renamed.                                	|
 | [empty_docs](https://rust-lang.github.io/rust-clippy/master/#empty_docs) 	| Disallow empty docs - preventing bypass of `missing_docs` 	|
 | [missing_panics_doc](https://rust-lang.github.io/rust-clippy/master/#missing_panics_doc)   	| Warns that documentation should have a `# Panics` section if function can panic                    	|
 | [missing_errors_doc](https://rust-lang.github.io/rust-clippy/master/#missing_errors_doc)   	| Warns that documentation should have a `# Errors` section if function returns a `Result` explaining `Err` conditions                    	|
@@ -203,7 +203,7 @@ pub fn add(a: i32, b: i32) -> i32 {
 
 ### `//!` Module/Crate level Documentation
 
-Use `//!` when you want to document the **purpose of a module or a crate**. It is places at the top of a `lib.rs` or `mod.rs` file, for example `engine/mod.rs`:
+Use `//!` when you want to document the **purpose of a module or a crate**. It is placed at the top of a `lib.rs` or `mod.rs` file, for example `engine/mod.rs`:
 ```rust
 //! This module implements a custom chess engine.
 //! 

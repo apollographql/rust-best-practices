@@ -22,13 +22,13 @@ You might be wondering whether there is a runtime cost when using generic type p
 
 ## 6.2 Static Dispatch: `impl Trait` or `<T: Trait>`
 
-A static dispatch is basically a constrained version of a generics, a trait bounded generic, at compile-time it is able to check if your generic satisfies the declared traits.
+A static dispatch is basically a constrained version of generics, a trait bounded generic, at compile-time it is able to check if your generic satisfies the declared traits.
 
 ### ✅  Best when:
 * You want **zero runtime cost**, by paying the compile time cost.
 * You need **tight loops or performance**.
 * Your types are **known at compile time**.
-* Your are working with **single-use implementations** (monomorphized).
+* You are working with **single-use implementations** (monomorphized).
 
 ### 🏎️ Example: High-performance function with generic
 ```rust
@@ -54,7 +54,7 @@ Usually dynamic dispatch is used with some kind of pointer or a reference, like 
 * You want to **abstract internals behind a stable interface**.
 * You are writing a **plugin-style architecture**.
 
-> ❗ Closer to what you would get in an object oriented language and can have some heavy costs associated to it. Can avoid generic entirely and let you mix types that implement the same traits.
+> ❗ Closer to what you would get in an object oriented language and can have some heavy costs associated to it. Can avoid generics entirely and let you mix types that implement the same traits.
 
 ### 🚚 Example: Heterogeneous collection
 

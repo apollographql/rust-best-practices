@@ -1,8 +1,8 @@
 # Chapter 4 - Errors Handling
 
-Rust enforces a strict error handling approach, but *how* you handle them defines where your code feels ergonomic, consistent and safe - as opposing cryptic and painful. This chapter dives into best practices for modeling and managing fallible operations across libraries and binaries.
+Rust enforces a strict error handling approach, but *how* you handle them defines where your code feels ergonomic, consistent and safe - as opposed to cryptic and painful. This chapter dives into best practices for modeling and managing fallible operations across libraries and binaries.
 
-> Even if you decide to crash you application with `unwrap` or `expect`, Rust forces you to declare that intentionally.
+> Even if you decide to crash your application with `unwrap` or `expect`, Rust forces you to declare that intentionally.
 
 ## 4.1 Prefer `Result`, avoid panic 🫨
 
@@ -23,7 +23,7 @@ fn divide(x: f64, y: f64) -> Result<f64, DivisionError> {
 * There are 3 relevant macros that can replace `panic!` in appropriate conditions:
     * `todo!`, similar to panic, but alerts the compiler that you are aware that there is code missing.
     * `unreachable!`, you have reasoned about the code block and are sure that condition `xyz` is not possible and if ever becomes possible you want to be alerted.
-    * `unimplemented!`, specially useful for alerting that a block is not yet implement with a reason.
+    * `unimplemented!`, specially useful for alerting that a block is not yet implemented with a reason.
 
 ## 4.2 Avoid `unwrap`/`expect` in Production
 
