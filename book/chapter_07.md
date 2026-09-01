@@ -1,6 +1,6 @@
 # Chapter 7 - Type State Pattern
 
-Models state at compile time, preventing bugs by making illegal states unrepresentable. It takes advantage of the Rust generics and type system to create sub-types that can only be reached if a certain condition is achieved, making some operations illegal at compile time. 
+Models state at compile time, preventing bugs by making illegal states unrepresentable. It takes advantage of the Rust generics and type system to create sub-types that can only be reached if a certain condition is achieved, making some operations illegal at compile time.
 
 > Recently it became the standard design pattern of Rust programming. However, it is not exclusive to Rust, as it is achievable and has inspired other languages to do the same [swift](https://swiftology.io/articles/typestate/) and [typescript](https://catchts.com/type-state).
 
@@ -34,7 +34,7 @@ struct File<State> {
     /// Open `File` handler
     handle: Option<std::fs::File>,
     /// Type state manager
-    _state: std::marker::PhantomData<State> 
+    _state: std::marker::PhantomData<State>
 }
 
 impl File<FileNotOpened> {
@@ -89,10 +89,8 @@ A type-state pattern can have more than one associated states:
 ```rust
 use std::marker::PhantomData;
 
-struct MissingName;
-struct NameSet;
-struct MissingAge;
-struct AgeSet;
+struct Unset;
+struct Set;
 
 #[derive(Debug)]
 struct Person {
@@ -101,48 +99,41 @@ struct Person {
     email: Option<String>,
 }
 
-struct Builder<HasName, HasAge> {
+struct Builder<NameState = Unset, AgeState = Unset> {
     name: Option<String>,
     age: u8,
     email: Option<String>,
-    _name_marker: PhantomData<HasName>,
-    _age_marker: PhantomData<HasAge>,
+    _maker_state: PhantomData<(NameState, AgeState)>,
 }
 
-impl Builder<MissingName, MissingAge> {
-    fn new() -> Self {
-        Builder { name: None, age: 0, _name_marker: PhantomData, _age_marker: PhantomData, email: None }
-    }
-
-    fn name(self, name: String) -> Builder<NameSet, MissingAge> {
-        Builder { name: Some(name), _name_marker: PhantomData::<NameSet>, age: self.age, _age_marker: PhantomData, email: None }
-    }
-
-    fn age(self, age: u8) -> Builder<MissingName, AgeSet> {
-        Builder { age,  _age_marker: PhantomData::<AgeSet>, name: None, _name_marker: PhantomData, email: None }
+impl Builder<Unset, Unset> {
+    const fn new() -> Self {
+        Self { name: None, age: 0, email: None, _maker_state: PhantomData }
     }
 }
 
-impl Builder<NameSet, MissingAge> {
-    fn age(self, age: u8) -> Builder<NameSet, AgeSet> {
-        Builder { age,  _age_marker: PhantomData::<AgeSet>, name: self.name, _name_marker: PhantomData::<NameSet>, email: None }
+impl<NameState> Builder<NameState, Unset> {
+    fn age(self, age: u8) -> Builder<NameState, Set> {
+        Builder { age, name: self.name, email: self.email, _maker_state: PhantomData }
     }
 }
 
-impl Builder<MissingName, AgeSet> {
+impl<AgeState> Builder<Unset, AgeState> {
+    fn name(self, name: String) -> Builder<Set, AgeState> {
+        Builder { name: Some(name), age: self.age, email: self.email, _maker_state: PhantomData }
+    }
+}
+
+impl<NameState, AgeState> Builder<NameState, AgeState> {
     fn email(self, email: String) -> Self {
-        Self { name: self.name , age: self.age , email: Some(email) , _name_marker: self._name_marker , _age_marker: self._age_marker  }
-    }
-
-    fn name(self, name: String) -> Builder<NameSet, AgeSet> {
-        Builder { name: Some(name), _name_marker: PhantomData::<NameSet>, age: self.age, _age_marker: PhantomData::<AgeSet>, email: self.email }
+        Self { name: self.name, age: self.age, email: Some(email), _maker_state: PhantomData }
     }
 }
 
-impl Builder<NameSet, AgeSet> {
+impl Builder<Set, Set> {
     fn build(self) -> Person {
-        Person { 
-            name: self.name.unwrap_or_else(|| unreachable!("Name is guarantee to be set")), 
+        Person {
+            name: self.name.unwrap_or_else(|| unreachable!("Name is guarantee to be set")),
             age: self.age,
             email: self.email,
         }
@@ -163,8 +154,13 @@ let person: Person = Builder::new().age(30).name("name".to_string()).email("myse
 let person: Person = Builder::new().name("name".to_string()).build(); // ❌ Compile error: Age required to `build`
 let person: Person = Builder::new().age(30).build(); // ❌ Compile error:  Name required to `build`
 let person: Person = Builder::new().age(30).email("myself@email.com".to_string()).build(); // ❌ Compile error:  Name required to `build`
+let person: Person = Builder::new().age(10).age(15); // ❌ Compile error:  Age was already set
 let person: Person = Builder::new().build();// ❌ Compile error:  Name and Age required to `build`
 ```
+
+### Crates implementing Builder pattern
+
+Some libraries are already implementing the builder pattern, like [bon-rs](https://docs.rs/bon/latest/bon/)
 
 ### Network Protocol State Machine
 
