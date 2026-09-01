@@ -31,7 +31,7 @@ impl File<FileOpened> {
 
         let mut content = String::new();
         let Some(handle) = self.handle.as_mut() else {
-            unreachable!("Safe to unwrao as state can only be reached when file is open");
+            unreachable!("Safe to panic as state can only be reached when file is open");
         };
         handle.read_to_string(&mut content)?;
         Ok(content)
@@ -43,10 +43,16 @@ impl File<FileOpened> {
 }
 
 fn main() {
-    let dir = std::env::current_dir().unwrap();
+    let dir = std::env::current_dir().expect("Failed to set current_dir");
     let path = dir.join("examples/simple-type-state/hello.txt");
-    let mut file = File::open(&path).unwrap();
-    let content = file.read().unwrap();
+    let mut file = File::open(&path)
+        .unwrap_or_else(|err| panic!("Failed to open the file {}: {err}", path.display()));
+    let content = file.read().unwrap_or_else(|err| {
+        panic!(
+            "Failed to read the file inside {}: {err}",
+            file.path().display()
+        )
+    });
 
     println!("{content} at {}", file.path().display());
 }
