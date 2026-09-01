@@ -29,7 +29,7 @@ fn divide(x: f64, y: f64) -> Result<f64, DivisionError> {
 
 Although `expect` is preferred to `unwrap`, as it can have context, they should be avoided in production code as there are smarter alternatives to them. Considering that, they should be used in the following scenarios:
 - In tests, assertions or test helper functions.
-- When failure is impossible.
+- When failure is impossible. Remember, the code should not have the possibility to be in a incoherent state. cf. [Type State Pattern](./chapter_07.md)
 - When the smarter options can't handle the specific case.
 
 ### 🚨 Alternative ways of handling `unwrap`/`expect`:
@@ -43,8 +43,6 @@ let Ok(json) = serde_json::from_str(&input) else {
 * If your `Result` (or `Option`) needs error recovery in case of `Result::Err`, that doesn't need to know the `Err` value, use `if let Ok(..) else { ... }` pattern:
 ```rust
 if let Ok(json) = serde_json::from_str(&input) else {
-    ...
-} else {
     Err(do_something_with_input(&input))
 }
 ```
@@ -86,7 +84,6 @@ pub enum ServiceError {
     Db(#[from] DbError),
     #[error("External services error: {0}")]
     ExternalServices(#[from] ExternalHttpError)
-    
 }
 ```
 
@@ -121,7 +118,7 @@ fn handle_request(req: &Request) -> Result<ValidatedRequest, RequestValidationEr
     validate_credentials(req)?;
     let body = Body::try_from(req)?;
 
-    Ok(ValidatedRequest::try_from((req, body))?)
+    ValidatedRequest::try_from((req, body))
 }
 ```
 
@@ -134,13 +131,13 @@ While many errors don't implement PartialEq and Eq, making it hard to do direct 
 ```rust
 #[test]
 fn error_does_not_implement_partial_eq() {
-    let err = divide(10., 0.0).unwrap_err();
+    let err = divide(10., 0.0).expect_err("Division by 0.0 succeeded");
     assert_eq!(err.to_string(), "division by zero");
 }
 
 #[test]
 fn error_implements_partial_eq() {
-    let err = process(my_value).unwrap_err();
+    let err = process(my_value).expect_err("<process> succeeded with <my_value>");
 
     assert_eq!(
         err,
