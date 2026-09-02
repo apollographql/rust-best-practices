@@ -5,7 +5,91 @@
 * Tests in rust are declared with the attribute macro `#[test]`. Most code editors can compile and run the functions declared under the macro individually or blocks of them.
 * Test can have special compilation flags with `#[cfg(test)]`. Also executable in code editors if it contained `#[test]`, it is a good way to mock complicated functions or override traits.
 
-## 5.1 Tests as Living Documentation
+## 5.1 Testing tools
+
+### Cargo plugins
+
+#### cargo-nextest
+
+Rather use `cargo nextest run` if installed. It run tests faster than `cargo test` which run module by modules tests.
+
+#### cargo-llvm-cov
+
+You can have a test-coverage with `cargo llvm-cov`.
+
+### crates
+
+#### rstest
+
+To test a function with different parameters, you can use the lib [rstest](https://docs.rs/rstest/latest/rstest/)
+```rust
+#[rstest::rstest]
+#[case::one("1")]
+#[case::lower_a("a")]
+#[case::upper_f("F")]
+fn should_parse_str_to_hexadecimal(#[case] number_to_parse: &str) {
+  u32::from_str_radix(number_to_parse, 16)
+    .unwrap_or_else(|err| panic!("Failed to parse \"{number_to_parse}\": {err}"));
+}
+```
+
+#### mockall
+
+To mock a trait, you can use [mockall](https://docs.rs/mockall/latest/mockall/)
+
+```rust
+#[cfg_attr(test, mockall::automock)]
+trait Repository {
+  fn get_user(&self, id: u32) -> User;
+}
+
+#[test]
+fn should_get_users() {
+  // Expected
+  let expected_users = User {
+    name: "user21".to_owned(),
+  };
+
+  // Given
+  let mut repository = MockRepository::new();
+  repository
+    .expect_get_user()
+    .with(mockall::predicate::eq(21))
+    .returning(|_| User {
+      name: "user21".to_owned(),
+    })
+    .once();
+
+  let application = Application::new(repository);
+
+  // When
+  let users = application.get_users();
+
+  // Then
+  assert_eq!(users, expected_users);
+```
+
+#### pretty_assertions
+
+Print better differences with pretty_assertions, with `use pretty_assertions::{assert_eq};`
+
+Transform
+```
+thread 'main' panicked at 'assertion failed: `(left == right)`
+  left: `Some(Foo { lorem: "Hello World!", ipsum: 42, dolor: Ok("hey") })`
+ right: `Some(Foo { lorem: "Hello Wrold!", ipsum: 42, dolor: Ok("hey ho!") })`', examples/standard_assertion.rs:20:5
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+```
+
+Into
+
+![pretty_assertions diff](../images/pretty_assertions.png)
+
+#### insta
+
+cf. [Snapshot testing with cargo insta](./chapter_05.md#56-snapshot-testing-with-cargo-insta)
+
+## 5.2 Tests as Living Documentation
 
 In Rust, as in many other languages, tests often show how the functions are meant to be used. If a test is clear and targeted, it's often more helpful than reading the function body, when combined with other tests, they serve as living documentation.
 
@@ -63,7 +147,7 @@ mod process {
 }
 ```
 
-> When executing `cargo test` the test output for each option will look like:
+> When executing `cargo nextest run` the test output for each option will look like:
 > Option 1: `process_should_return_blob_when_larger_than_b`.
 > Option 2: `process::should_return_blob_when_larger_than_b`.
 
@@ -76,7 +160,6 @@ Together, that means you can use the module name to group related tests together
 ```rust
 #[cfg(test)]
 mod test {  // IDEs will provide a ▶️ button here
-
   mod process {
     #[test] // IDEs will provide a ▶️ button here
     fn returns_error_xyz_when_b_is_negative() {
@@ -172,7 +255,7 @@ fn the_function_accepts_all_strings_with_a(#[case] input: &str) {
 
 > ❗ Share **setup**, not the test itself: keep each test's action and assertion inline, even when repetitive. Tests tolerate duplication better than production code — see [Chapter 1, §1.8](chapter_01.md#-test-code-readability-beats-dry).
 
-## 5.2 Add Test Examples to your Docs
+## 5.3 Add Test Examples to your Docs
 
 We will deep dive into docs at a later stage, so in this section we will just briefly go over how to add tests to your docs. Rustdoc can turn examples into executable tests using `///` with a few advantages:
 
@@ -210,7 +293,7 @@ generic_add(5.2, 4) // => 9.2
 generic_add(2, 2.0) // => 4
 ```
 
-## 5.3 Unit Test vs Integration Tests vs Doc tests
+## 5.4 Unit Test vs Integration Tests vs Doc tests
 
 As a general rule, without delving into *test pyramid naming*, rust has 3 sets of tests:
 
@@ -272,7 +355,7 @@ As mentioned in section [5.2](#52-add-test-examples-to-your-docs), doc tests sho
 * `no_run`: compiles but doesn't execute the code, similar to `cargo check`. Very useful when dealing with side-effects for documentation.
 * `compile_fail`: Test rustdoc that this block should cause a compilation fail, important when you want to demonstrate wrong use cases.
 
-## 5.4 How to `assert!`
+## 5.5 How to `assert!`
 
 Rust comes with 2 macros to make assertions:
 * `assert!` for asserting boolean values like `assert!(value.is_none(), "{value:?} is not None")`
@@ -291,11 +374,8 @@ use std::assert_matches::assert_matches;
 assert_matches!(error, MyError::BadInput(_));
 ```
 * Use `#[should_panic]` wisely. It should only be used when panic is the desired behavior, prefer result instead of panic.
-* There are some other that can enhance your testing experience like:
-    * [`rstest`](https://crates.io/crates/rstest): fixture based test framework with procedural macros.
-    * [`pretty_assertions`](https://crates.io/crates/pretty_assertions): overrides `assert_eq` and `assert_ne`,  and creates colorful diffs between them.
 
-## 5.5 Snapshot Testing with `cargo insta`
+## 5.6 Snapshot Testing with `cargo insta`
 
 > When correctness is visual or structural, snapshots tell the story better than asserts.
 
@@ -341,7 +421,7 @@ Snapshot testing compares your output (text, Json, HTML, YAML, etc) against a sa
 * Flaky tests, randomly generated output, unless redacted.
 * Snapshots of external resources, use mocks and stubs.
 
-## 5.6 ✅ Snapshot Best Practices
+## 5.7 ✅ Snapshot Best Practices
 
 * Named snapshots, it gives meaningful snapshot files names, e.g. `snapshots/this_is_a_named_snapshot.snap`
 ```rust
