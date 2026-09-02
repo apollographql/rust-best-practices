@@ -2,7 +2,7 @@
 
 Many higher level languages hide memory management, typically **passing by value** (copy data) or **passing by reference** (reference to shared data) without worrying about allocation, heap, stack, ownership and lifetimes, it is all delegated to the garbage collector or VM. Here is a comparison on this topic between a few languages:
 
-### 📌 Language Comparison 
+### 📌 Language Comparison
 
 | Language   	| Value Types                         	| Reference/Pointer Types                                   	| Async Model & Types                                                        	| Manual Memory                	|
 |------------	|-------------------------------------	|-----------------------------------------------------------	|----------------------------------------------------------------------------	|------------------------------	|
@@ -34,7 +34,7 @@ Rust tracks pointers using `Send` and `Sync` traits:
 | `Mutex<T>`       	| Thread-safe interior mutability with exclusive access                     	| Yes                                  	| Shared mutable, threaded |
 | `RwLock<T>`      	| Thread-safe shared readonly access OR exclusive mutable access            	| Yes                                  	| Shared mutable, threaded |
 | `OnceCell<T>`    	| Single-thread one-time initialization container (interior mutability ONCE)    | No, not Sync                         	| Simple lazy value initialization |
-| `LazyCell<T>`    	| A lazy version of `OnceCell<T>` that calls function closure to initialize 	| No, not Sync                         	| Complex lazy value initialization 
+| `LazyCell<T>`    	| A lazy version of `OnceCell<T>` that calls function closure to initialize 	| No, not Sync                         	| Complex lazy value initialization |
 | `OnceLock<T>`    	| Thread-safe version of `OnceCell<T>`                                      	| Yes                                  	| Multi-thread single init |
 | `LazyLock<T>`    	| Thread-safe version of  `LazyCell<T>`                                     	| Yes                                  	| Multi-thread complex init	|
 | `*cont T/*mut T` 	| Raw Pointers                                                              	| No, user must ensure safety manually 	| Raw memory / FFI |
@@ -46,7 +46,7 @@ Rust tracks pointers using `Send` and `Sync` traits:
 Probably the most common type in a Rust code base, it is **Safe, with no mutation** and allows **multiple readers**.
 
 ```rust
-let data: String = String::from_str("this a string").unwrap();
+let data: String = "this a string".to_owned();
 
 print_len(&data);
 print_capacity(&data);
@@ -69,7 +69,7 @@ fn print_bytes(s: &String) {
 Probably the most common *mutable* type in a Rust code base, it is **Safe, but only allows one mutable borrow at a time**.
 
 ```rust
-let mut data: String = String::from_str("this a string").unwrap();
+let mut data: String = "this a string".to_owned();
 mark_update(&mut data);
 
 fn mark_update(s: &mut String) {
@@ -178,7 +178,7 @@ use std::{cell::OnceCell, rc::Rc};
 #[derive(Debug, Default)]
 struct MyStruct {
     distance: usize,
-    root: Option<Rc<OnceCell<MyStruct>>>,    
+    root: Option<Rc<OnceCell<MyStruct>>>,
 }
 
 fn main() {
@@ -217,7 +217,7 @@ use std::sync::OnceLock;
 static CELL: OnceLock<usize> = OnceLock::new();
 
 // `OnceLock` has not been written to yet.
-assert!(CELL.get().is_none());
+assert!(CELL.get().is_none(), "CELL.get() is not None, but: {:?}", CELL.get());
 
 // Spawn a thread and write to `OnceLock`.
 std::thread::spawn(|| {
@@ -225,7 +225,7 @@ std::thread::spawn(|| {
     assert_eq!(value, &12345);
 })
 .join()
-.unwrap();
+.expect("Joining thread::spawn failed");
 
 // `OnceLock` now contains the value.
 assert_eq!(

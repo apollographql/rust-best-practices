@@ -14,12 +14,12 @@ In Rust, as in many other languages, tests often show how the functions are mean
 > In the unit test name we should see the following:
 > * `unit_of_work`: which *function* we are calling. The **action** that will be executed. This is often be the name of the the test `mod` where the function is being tested.
 ```rust
-#[cfg(test)] 
-mod test { 
-  mod function_name { 
-    #[test] 
-    fn returns_y_when_x() { ... } 
-  } 
+#[cfg(test)]
+mod test {
+  mod function_name {
+    #[test]
+    fn returns_y_when_x() { ... }
+  }
 }
 ```
 > * `expected_behavior`: the set of **assertions** that we need to verify that the test works.
@@ -43,7 +43,7 @@ fn process_should_return_blob_when_larger_than_b() {
     let b = Some(2);
     let expected = MyExpectedStruct { ... };
 
-    let result = process(a, b).unwrap();
+    let result = process(a, b).expect("Failed to process a & b");
 
     assert_eq!(result, expected);
 }
@@ -56,7 +56,7 @@ mod process {
       let b = Some(2);
       let expected = MyExpectedStruct { ... };
 
-      let result = process(a, b).unwrap();
+      let result = process(a, b).expect("Failed to process a & b");
 
       assert_eq!(result, expected);
   }
@@ -83,9 +83,9 @@ mod test {  // IDEs will provide a ▶️ button here
         let a = setup_a_to_be_xyz();
         let b = Some(-5);
         let expected = MyError::Xyz;
-    
-        let result = process(a, b).unwrap_err();
-    
+
+        let result = process(a, b).expect_err("Process succeeded with a & b");
+
         assert_eq!(result, expected);
     }
 
@@ -95,7 +95,7 @@ mod test {  // IDEs will provide a ▶️ button here
       let b = None;
       let expected = MyError::InvalidInput;
 
-      let result = process(a, b).unwrap_err();
+      let result = process(a, b).expect_err("Process succeeded with None & None");
 
       assert_eq!(result, expected);
     }
@@ -111,8 +111,8 @@ This makes it easier to understand why a test is failing.
 #### ❌ Don't test multiple things in the same test
 ```rust
 fn test_thing_parser(...) {
-  assert!(Thing::parse("abcd").is_ok());
-  assert!(Thing::parse("ABCD").is_err());
+  Thing::parse("abcd").expect("Failed to parse abcd into Thing");
+  Thing::parse("ABCD").expect_err("Succeeded to parse ABCD into Thing");
 }
 ```
 
@@ -122,17 +122,12 @@ fn test_thing_parser(...) {
 mod test_thing_parser {
   #[test]
   fn lowercase_letters_are_valid() {
-    assert!(
-      Thing::parse("abcd").is_ok(),
-      // Works like `eprintln`, `format` and `println` macros
-      "Thing parse error: {:?}", 
-      Thing::parse("abcd").unwrap_err()
-    );
+    Thing::parse("abcd").expect("Failed to parse abcd into Thing"),
   }
 
   #[test]
   fn capital_letters_are_invalid() {
-    assert!(Thing::parse("ABCD").is_err());
+    Thing::parse("ABCD").expect_err("Succeed to parse ABCD into Thing");
   }
 }
 ```
@@ -141,7 +136,7 @@ mod test_thing_parser {
 
 ### Use very few, ideally one, assertion per test
 
-When there are multiple assertions per test, it's both harder to understand the intended behavior and 
+When there are multiple assertions per test, it's both harder to understand the intended behavior and
 often requires many iterations to fix a broken test, as you work through assertions one by one.
 
 ❌ Don't include many assertions in one test:
@@ -149,10 +144,10 @@ often requires many iterations to fix a broken test, as you work through asserti
 ```rust
 #[test]
 fn test_valid_inputs() {
-  assert!(the_function("a").is_ok());
-  assert!(the_function("ab").is_ok());
-  assert!(the_function("ba").is_ok());
-  assert!(the_function("bab").is_ok());
+  the_function("a").expect("Failed to parse \"a\"");
+  the_function("ab").expect("Failed to parse \"ab\"");
+  the_function("ba").expect("Failed to parse \"ba\"");
+  the_function("bab").expect("Failed to parse \"bab\"");
 }
 ```
 
@@ -165,7 +160,8 @@ To avoid boilerplate, either use a shared setup function or [rstest](https://cra
 #[case::last_letter("ba")]
 #[case::in_the_middle("bab")]
 fn the_function_accepts_all_strings_with_a(#[case] input: &str) {
-  assert!(the_function(input).is_ok());
+  the_function(input)
+    .unwrap_or_else(|err| panic!("Failed to parse {input}: {err}"));
 }
 ```
 
@@ -187,19 +183,19 @@ We will deep dive into docs at a later stage, so in this section we will just br
 
 ```rust
 /// Helper function that adds any two numeric values together.
-/// This function reasons about which would be the correct type to parse based on the type 
+/// This function reasons about which would be the correct type to parse based on the type
 /// and the size of the numeric value.
-/// 
+///
 /// # Examples
-/// 
+///
 /// ```rust
 /// # use crate_name::generic_add;
 /// use num::numeric;
-/// 
+///
 /// # assert_eq!(
 /// generic_add(5.2, 4) // => 9.2
 /// # , 9.2)
-/// 
+///
 /// # assert_eq!(
 /// generic_add(2, 2.0) // => 4
 /// # , 4)
@@ -245,7 +241,7 @@ mod unit_of_work_tests {
 
 ### Integration Tests
 
-Tests that go under the `tests/` directory, they are entirely external to your library and use the same code as any other code would use, not have access to private and crate level functions, which means they can **only test** functions on your **public API**. 
+Tests that go under the `tests/` directory, they are entirely external to your library and use the same code as any other code would use, not have access to private and crate level functions, which means they can **only test** functions on your **public API**.
 
 > Their purpose is to test whether many parts of the code work together correctly, units of code that work correctly on their own could have problems when integrated.
 
@@ -254,14 +250,14 @@ Tests that go under the `tests/` directory, they are entirely external to your l
 * if testing binaries, try to break **executable** and **functions** into `src/main.rs` and `src/lib.rs`, respectively.
 
 ```
-├── Cargo.lock 
-├── Cargo.toml 
-├── src 
-│   └── lib.rs 
-└── tests 
-    ├── mod.rs 
-    ├── common 
-    │   └── mod.rs 
+├── Cargo.lock
+├── Cargo.toml
+├── src
+│   └── lib.rs
+└── tests
+    ├── mod.rs
+    ├── common
+    │   └── mod.rs
     └── integration_test.rs
 ```
 
@@ -279,7 +275,7 @@ As mentioned in section [5.2](#52-add-test-examples-to-your-docs), doc tests sho
 ## 5.4 How to `assert!`
 
 Rust comes with 2 macros to make assertions:
-* `assert!` for asserting boolean values like `assert!(value.is_ok(), "'value' is not Ok: {value:?}")`
+* `assert!` for asserting boolean values like `assert!(value.is_none(), "{value:?} is not None")`
 * `assert_eq!` for checking equality between two different values, `assert_eq!(result, expected, "'result' differs from 'expected': {}", result.diff(expected))`.
 
 ### 🚨 `assert!` reminders
@@ -352,7 +348,7 @@ Snapshot testing compares your output (text, Json, HTML, YAML, etc) against a sa
 assert_snapshot!("this_is_a_named_snapshot", output);
 ```
 
-* Keep snapshots small and clear. 
+* Keep snapshots small and clear.
 ```rust
 // ✅ Best case:
 assert_snapshot!("app_config/http", whole_app_config.http);
@@ -361,7 +357,7 @@ assert_snapshot!("app_config/http", whole_app_config.http);
 assert_snapshot!("app_config", whole_app_config); // Huge object
 ```
 
-> #### 🚨 Avoid snapshotting huge objects 
+> #### 🚨 Avoid snapshotting huge objects
 > Huge objects become hard to review and reason about.
 
 * Avoid snapshotting simple types (primitives, flat enums, small structs):
