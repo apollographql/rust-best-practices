@@ -182,8 +182,8 @@ Use `///` for functions, structs, traits, enums, const, etc:
 /// # Examples
 ///
 /// ```
-/// let result = my_crate::add(2, 3);
-/// assert_eq!(result, 5);
+/// let sum = my_crate::add(2, 3);
+/// assert_eq!(sum, 5);
 /// ```
 pub fn add(a: i32, b: i32) -> i32 {
     a + b
@@ -194,8 +194,8 @@ pub fn add(a: i32, b: i32) -> i32 {
 * ✅ Prefer writing examples that can be tested via `cargo test`, even if you have to hide their output with starting `#`:
 ```rust
 /// ```
-/// let result = my_crate::add(2, 3);
-/// # assert_eq!(result, 5);
+/// let sum = my_crate::add(2, 3);
+/// # assert_eq!(sum, 5);
 /// ```
 ```
 * ✅ Use `# Panics`, `# Errors` and `# Safety` sections when relevant.

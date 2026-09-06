@@ -2,7 +2,7 @@
 
 ## 1.1 Borrowing Over Cloning
 
-Rust’s ownership system encourages **borrow** (`&T`) instead of **cloning** (`T.clone()`). 
+Rust’s ownership system encourages **borrow** (`&T`) instead of **cloning** (`T.clone()`).
 > ❗ Performance recommendation
 
 ### ✅ When to `Clone`:
@@ -146,6 +146,9 @@ enum Direction {
 
 ## 1.3 Handling `Option<T>` and `Result<T, E>`
 Rust 1.65 introduced a better way to safely unpack Option and Result types with the `let Some(x) = … else { … }` or `let Ok(x) = … else { … }` when you have a default `return` value, `continue` or `break` default else case. It allows early returns when the missing case is **expected and normal**, not exceptional.
+
+> Remember to name your variables with business names, and avoid `result` for a result type.
+> You can shadow variables: `let user: Result<User, ...> = ...; let user: User = ...;`
 
 ### ✅ Cases to use each pattern matching for Option and Result
 * Use `match` when you want to pattern match against the inner types `T` and `E`
@@ -338,7 +341,7 @@ for value in vec.iter().enumerate()
     .filter(|(index, value)| value % index == 0) {
     // ...
 }
-    
+
 ```
 
 > #### ❗REMEMBER: Iterators are Lazy
@@ -364,7 +367,7 @@ Well-written Rust code, with expressive types and good naming, often speaks for 
 
 Still, there are **moments where code alone isn't enough** - when there are performance quirks, external constraints, or non-obvious tradeoffs that require a nudge to the reader. In those cases, a concise comment can prevent hours of head-scratching or searching git history.
 
-### ✅ Good comments 
+### ✅ Good comments
 
 * Safety concerns:
 ```rust
@@ -410,8 +413,8 @@ let connector_tls_root_store: RootCertStore = configuration
 
 * Wall-of-text explanations: long comments and multiline comments
 ```rust
-// Lorem Ipsum is simply dummy text of the printing and typesetting industry. 
-// Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, 
+// Lorem Ipsum is simply dummy text of the printing and typesetting industry.
+// Lorem Ipsum has been the industry's standard dummy text ever since the 1500s,
 // when an unknown printer took a galley
 fn do_something_odd() {
   …
@@ -494,7 +497,7 @@ There are a few gotchas when calling comments "living documentation":
 * Many large comments make people avoid reading them.
 * Team becomes fearful of deleting irrelevant comments.
 
-If you find a comment, **don't trust it blindly**. Read it in context. If it's wrong or outdated, fix or remove it. A misleading comment is worse than no comments at all. 
+If you find a comment, **don't trust it blindly**. Read it in context. If it's wrong or outdated, fix or remove it. A misleading comment is worse than no comments at all.
 
 > Comments should bother you - they demand re-verification, just like stale tests.
 
