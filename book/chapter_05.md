@@ -1,9 +1,12 @@
-# Chapter 5 - Automated Testing
+# Chapter 5 - Automated Testing - clean-test
 
 > Tests are not just for correctness. They are the first place people look to understand how your code works.
 
 * Tests in rust are declared with the attribute macro `#[test]`. Most code editors can compile and run the functions declared under the macro individually or blocks of them.
 * Test can have special compilation flags with `#[cfg(test)]`. Also executable in code editors if it contained `#[test]`, it is a good way to mock complicated functions or override traits.
+
+> A test verify the code.
+> A clean-test is are also easily debuggable. If they fails, they must give the maximum of information to debug.
 
 ## 5.1 Testing tools
 
@@ -191,21 +194,26 @@ mod test {  // IDEs will provide a ▶️ button here
 To keep tests clear, they should describe _one_ thing that the unit does.
 This makes it easier to understand why a test is failing.
 
-#### ❌ Don't test multiple things in the same test
+❌ Don't test multiple things in the same test
+
 ```rust
 fn test_thing_parser(...) {
   Thing::parse("abcd").expect("Failed to parse \"abcd\" into Thing");
+  Thing::parse("ab").expect("Failed to parse \"ab\" into Thing");
   Thing::parse("ABCD").expect_err("Succeeded to parse \"ABCD\" into Thing");
 }
 ```
 
-#### ✅ Test one thing per test
+✅ Test one thing per test
+
 ```rust
 #[cfg(test)]
 mod test_thing_parser {
-  #[test]
-  fn lowercase_letters_are_valid() {
-    Thing::parse("abcd").expect("Failed to parse \"abcd\" into Thing"),
+  #[rstest::rstest]
+  #[case::ab("ab")]
+  #[case::abcd("abcd")]
+  fn lowercase_letters_are_valid(#[case] string_to_parse: &str) {
+    Thing::parse(string_to_parse).unwrap_or_else(|| panic!("Failed to parse \"{string_to_parse}\" into Thing"),
   }
 
   #[test]
@@ -215,38 +223,8 @@ mod test_thing_parser {
 }
 ```
 
-> `Ok` scenarios should have an `eprintln` of the `Err` case.
-
-### Use very few, ideally one, assertion per test
-
-When there are multiple assertions per test, it's both harder to understand the intended behavior and
-often requires many iterations to fix a broken test, as you work through assertions one by one.
-
-❌ Don't include many assertions in one test:
-
-```rust
-#[test]
-fn test_valid_inputs() {
-  the_function("a").expect("Failed to parse \"a\"");
-  the_function("ab").expect("Failed to parse \"ab\"");
-  the_function("ba").expect("Failed to parse \"ba\"");
-  the_function("bab").expect("Failed to parse \"bab\"");
-}
-```
-
 If you are testing separate behaviors, make multiple tests each with descriptive names.
 To avoid boilerplate, either use a shared setup function or [rstest](https://crates.io/crates/rstest) cases *with descriptive test names*:
-```rust
-#[rstest]
-#[case::single("a")]
-#[case::first_letter("ab")]
-#[case::last_letter("ba")]
-#[case::in_the_middle("bab")]
-fn the_function_accepts_all_strings_with_a(#[case] input: &str) {
-  the_function(input)
-    .unwrap_or_else(|err| panic!("Failed to parse {input}: {err}"));
-}
-```
 
 > Considerations when using `rstest`
 >
@@ -254,6 +232,42 @@ fn the_function_accepts_all_strings_with_a(#[case] input: &str) {
 > * Expectation vs condition naming is now visually inverted (expectation first).
 
 > ❗ Share **setup**, not the test itself: keep each test's action and assertion inline, even when repetitive. Tests tolerate duplication better than production code — see [Chapter 1, §1.8](chapter_01.md#-test-code-readability-beats-dry).
+
+### Use very few assertion per test
+
+When there are multiple assertions per test, it's harder to understand the intended behavior and
+often requires many iterations to fix a broken test, as you work through assertions one by one.
+
+> This would break the clean-test easily debuggable.
+
+❌ Don’t test struct fields one by one
+
+```rust
+#[test]
+fn should_create_nominal_user() {
+  // ...
+
+  assert_eq!(user.name, expected_user.name);
+  assert_eq!(user.email, expected_user.email);
+}
+```
+
+✅ Rather check all element at once, to have the maximum of information if the test fails
+
+```rust
+// #[cfg_attr(test, derive(Debug, PartialEq))]
+// struct User { .. }
+
+#[test]
+fn should_create_nominal_user() {
+  // ...
+
+  assert_eq!(user, expected_user);
+
+  // or if some fields must not be tested (eg. updated_time)
+  std::assert_matches!(user, User { name, email, .. } if name == "doe" && email == "john@doe.com");
+}
+```
 
 ## 5.3 Add Test Examples to your Docs
 
@@ -305,7 +319,7 @@ Tests that go in the **same module** as the **tested unit** was declared, this a
 * They should test for errors and edge cases.
 * Different tests of the same unit can be combined under a single `#[cfg(test)] mod test_unit_of_work {...}`, allowing multiple submodules for different `units_of_work`.
 * Try to keep external states/side effects to your API to minimum and focus those tests on the `mod.rs` files.
-* Tests that are not yet fully implemented can be ignored with the `#[ignore = "optional message"]` attribute.
+* Tests that are not yet fully implemented can be ignored with the `#[ignore = "optional message (but rather give an explanation)"]` attribute.
 * Tests that intentionally panic should be annotated with the attribute `#[should_panic]`.
 
 ```rust
