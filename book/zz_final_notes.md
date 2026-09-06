@@ -6,6 +6,7 @@
 * Keep an eye on [Rust blog](https://blog.rust-lang.org/) for new versions
 * [Rust Official API Guidelines](https://rust-lang.github.io/api-guidelines/about.html)
 * [Rust Analyzer Style Guide](https://rust-analyzer.github.io/book/contributing/style.html)
+* A weekly news on Rust [This Week in Rust](https://this-week-in-rust.org)
 
 ## Similar projects
 
