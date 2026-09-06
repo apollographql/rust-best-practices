@@ -20,7 +20,7 @@ Use `//` comments (double slashed) when something can't be expressed clearly in 
 * Links to **Design Docs** or **ADRs**.
 * Assumptions or **gotchas** that aren't obvious.
 
-> Name your comments! For example, a comment regarding a safety guarantee should start with `// SAFETY: ...`.
+> Name your comments! For example, a comment regarding a safety guarantee should start with `// SAFETY: ...`. (cf. lint [undocumented_unsafe_blocks](https://rust-lang.github.io/rust-clippy/stable/index.html#undocumented_unsafe_blocks))
 
 ### ✅ Good comment:
 ```rust
@@ -130,7 +130,7 @@ Use `///` doc comments  to document:
 
 ```rust
 /// Loads [`User`] profile from disk
-/// 
+///
 /// # Error
 /// - Returns [`MyError`] if the file is missing [`MyError::FileNotFound`].
 /// - Returns [`MyError`] if the content is an invalid Json, [`MyError::InvalidJson`].
@@ -142,9 +142,9 @@ fn load_user(path: &Path) -> Result<User, MyError> {...}
 ```rust
 /// Returns the square of the integer part of any number.
 /// Square is limited to `u128`.
-/// 
+///
 /// # Examples
-/// 
+///
 /// ```rust
 /// assert_eq!(square(4.3), 16)
 /// ```
@@ -206,9 +206,9 @@ pub fn add(a: i32, b: i32) -> i32 {
 Use `//!` when you want to document the **purpose of a module or a crate**. It is placed at the top of a `lib.rs` or `mod.rs` file, for example `engine/mod.rs`:
 ```rust
 //! This module implements a custom chess engine.
-//! 
+//!
 //! It handles board state, move generation and check detection.
-//! 
+//!
 //! # Example
 //! ```
 //! let board = chess::engine::Board::default();
