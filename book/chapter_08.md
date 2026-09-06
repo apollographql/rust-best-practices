@@ -92,14 +92,13 @@ fn save_user(&self) -> Result<(), MyError> {
 
 ```rust
 fn save_auth_user(&self) -> Result<PathBuf, MyError> {
-    if self.is_authenticated() {
-        let path = self.path();
-        let serialized_user = serde_json::to_string(self)?;
-        std::fs::write(path, serialized_user)?;
-        Ok(path)
-    } else {
-        Err(MyError::UserNotAuthenticated)
+    if !self.is_authenticated() {
+        return Err(MyError::UserNotAuthenticated);
     }
+    let path = self.path();
+    let serialized_user = serde_json::to_string(self)?;
+    std::fs::write(path, serialized_user)?;
+    Ok(path)
 }
 ```
 
