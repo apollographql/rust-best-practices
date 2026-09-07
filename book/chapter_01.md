@@ -658,3 +658,33 @@ Where to draw the line:
 * ❌ Keep each test's **action and assertion inline**, even when they look repetitive across tests.
 
 > 🚨 When in doubt, **prefer duplication**. A duplicated line is trivially fixed later; a wrong abstraction accretes parameters and conditionals, because each maintainer keeps patching it instead of undoing it.
+
+## 1.9 When a `bool` is not enough (and when it is)
+
+A `bool` is just an enum with 2 values, `Option` and `Result` are enums with fixed cases. When a parameter represents a **domain concept** rather than a literal yes/no, a bare `bool` is a [Flag Argument](https://martinfowler.com/bliki/FlagArgument.html) (see [§1.8](#18-when-to-extract-a-function-and-when-not-to)): it tells the reader nothing at the call site, and it silently assumes the concept will never need a third state.
+
+### ❌ Don't force a domain concept into a `bool`
+```rust
+fn order_vehicle(is_car: bool) { ... }
+
+// Which would give
+order_vehicle(true); // a car? a motorbike? unreadable, and caps the domain at 2 states
+```
+
+### ✅ Rather, name the states
+```rust
+enum Vehicle {
+  Car,
+  Motorbike,
+}
+
+fn order_vehicle(vehicle: Vehicle) { ... }
+
+order_vehicle(Vehicle::Car);
+```
+
+### ❓ When a `bool` is still fine
+* The parameter **is** a genuine yes/no predicate with no foreseeable third state (`is_valid`, `is_empty`, `overwrite`).
+* The name at the call site already makes the meaning obvious (`retry(true)` reads fine when there is truly nothing else `true` could mean).
+
+Don't reach for an enum just to avoid a `bool` — only do it when the parameter is actually standing in for a wider domain concept, or you will end up with the same [wrong-abstraction](#18-when-to-extract-a-function-and-when-not-to) problem in the other direction.
