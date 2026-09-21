@@ -63,7 +63,7 @@ impl File<FileOpened> {
 
         let mut content = String::new();
         let Some(handle)=  self.handle.as_mut() else {
-            unreachable!("Safe to unwrap as state can only be reached when file is open");
+            unreachable!("Safe to panic as state can only be reached when file is open");
         };
         handle.read_to_string(&mut content)?;
         Ok(content)

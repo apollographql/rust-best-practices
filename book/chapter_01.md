@@ -2,7 +2,7 @@
 
 ## 1.1 Borrowing Over Cloning
 
-Rust’s ownership system encourages **borrow** (`&T`) instead of **cloning** (`T.clone()`). 
+Rust’s ownership system encourages **borrow** (`&T`) instead of **cloning** (`T.clone()`).
 > ❗ Performance recommendation
 
 ### ✅ When to `Clone`:
@@ -146,6 +146,9 @@ enum Direction {
 
 ## 1.3 Handling `Option<T>` and `Result<T, E>`
 Rust 1.65 introduced a better way to safely unpack Option and Result types with the `let Some(x) = … else { … }` or `let Ok(x) = … else { … }` when you have a default `return` value, `continue` or `break` default else case. It allows early returns when the missing case is **expected and normal**, not exceptional.
+
+> Remember to name your variables with business names, and avoid `result` for a result type.
+> You can shadow variables: `let user: Result<User, ...> = ...; let user: User = ...;`
 
 ### ✅ Cases to use each pattern matching for Option and Result
 * Use `match` when you want to pattern match against the inner types `T` and `E`
@@ -338,7 +341,7 @@ for value in vec.iter().enumerate()
     .filter(|(index, value)| value % index == 0) {
     // ...
 }
-    
+
 ```
 
 > #### ❗REMEMBER: Iterators are Lazy
@@ -364,7 +367,7 @@ Well-written Rust code, with expressive types and good naming, often speaks for 
 
 Still, there are **moments where code alone isn't enough** - when there are performance quirks, external constraints, or non-obvious tradeoffs that require a nudge to the reader. In those cases, a concise comment can prevent hours of head-scratching or searching git history.
 
-### ✅ Good comments 
+### ✅ Good comments
 
 * Safety concerns:
 ```rust
@@ -410,8 +413,8 @@ let connector_tls_root_store: RootCertStore = configuration
 
 * Wall-of-text explanations: long comments and multiline comments
 ```rust
-// Lorem Ipsum is simply dummy text of the printing and typesetting industry. 
-// Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, 
+// Lorem Ipsum is simply dummy text of the printing and typesetting industry.
+// Lorem Ipsum has been the industry's standard dummy text ever since the 1500s,
 // when an unknown printer took a galley
 fn do_something_odd() {
   …
@@ -494,7 +497,7 @@ There are a few gotchas when calling comments "living documentation":
 * Many large comments make people avoid reading them.
 * Team becomes fearful of deleting irrelevant comments.
 
-If you find a comment, **don't trust it blindly**. Read it in context. If it's wrong or outdated, fix or remove it. A misleading comment is worse than no comments at all. 
+If you find a comment, **don't trust it blindly**. Read it in context. If it's wrong or outdated, fix or remove it. A misleading comment is worse than no comments at all.
 
 > Comments should bother you - they demand re-verification, just like stale tests.
 
@@ -655,3 +658,33 @@ Where to draw the line:
 * ❌ Keep each test's **action and assertion inline**, even when they look repetitive across tests.
 
 > 🚨 When in doubt, **prefer duplication**. A duplicated line is trivially fixed later; a wrong abstraction accretes parameters and conditionals, because each maintainer keeps patching it instead of undoing it.
+
+## 1.9 When a `bool` is not enough (and when it is)
+
+A `bool` is just an enum with 2 values, `Option` and `Result` are enums with fixed cases. When a parameter represents a **domain concept** rather than a literal yes/no, a bare `bool` is a [Flag Argument](https://martinfowler.com/bliki/FlagArgument.html) (see [§1.8](#18-when-to-extract-a-function-and-when-not-to)): it tells the reader nothing at the call site, and it silently assumes the concept will never need a third state.
+
+### ❌ Don't force a domain concept into a `bool`
+```rust
+fn order_vehicle(is_car: bool) { ... }
+
+// Which would give
+order_vehicle(true); // a car? a motorbike? unreadable, and caps the domain at 2 states
+```
+
+### ✅ Rather, name the states
+```rust
+enum Vehicle {
+  Car,
+  Motorbike,
+}
+
+fn order_vehicle(vehicle: Vehicle) { ... }
+
+order_vehicle(Vehicle::Car);
+```
+
+### ❓ When a `bool` is still fine
+* The parameter **is** a genuine yes/no predicate with no foreseeable third state (`is_valid`, `is_empty`, `overwrite`).
+* The name at the call site already makes the meaning obvious (`retry(true)` reads fine when there is truly nothing else `true` could mean).
+
+Don't reach for an enum just to avoid a `bool` — only do it when the parameter is actually standing in for a wider domain concept, or you will end up with the same [wrong-abstraction](#18-when-to-extract-a-function-and-when-not-to) problem in the other direction.

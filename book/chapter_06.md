@@ -10,7 +10,7 @@ Understanding the trade-offs lets you write faster, smaller and more flexible co
 
 ## 6.1 [Generics](https://doc.rust-lang.org/book/ch10-00-generics.html)
 
-Every programming language has tools for effectively handling the duplication of concepts. In Rust, one such tool is generics: abstract stand-ins for concrete types or other properties. We can express the behavior of generics or how they relate to other generics without knowing what will be in their place when compiling and running the code. 
+Every programming language has tools for effectively handling the duplication of concepts. In Rust, one such tool is generics: abstract stand-ins for concrete types or other properties. We can express the behavior of generics or how they relate to other generics without knowing what will be in their place when compiling and running the code.
 
 We use generics to create definitions for items like function signatures or structs, which we can then use with many different concrete data types. Let’s first look at how to define functions, structs, enums, and methods using generics. Generics can also be used to implement Type State Pattern and constrain a struct functionality to certain expected types, more on type state on [chapter 7](chapter_07.md).
 
@@ -130,7 +130,7 @@ fn all_animals_greeting(animals: Vec<Box<dyn Animal>>) {
 
 * Prefer `&dyn Trait` over `Box<dyn Trait>` when you don't need ownership.
 * Use `Arc<dyn Trait + Send + Sync>` for shared access across threads.
-* Don't use `dyn Trait` if the trait has methods that return `Self`.
+* It is impossible to use `dyn Trait` if the trait has methods that return `Self`.
 * **Avoid boxing too early**. Don't box inside structs unless you are sure it'll be beneficial or is required (recursive).
 ```rust
 // ✅ Use generics when possible

@@ -1,11 +1,98 @@
-# Chapter 5 - Automated Testing
+# Chapter 5 - Automated Testing - clean-test
 
 > Tests are not just for correctness. They are the first place people look to understand how your code works.
 
 * Tests in rust are declared with the attribute macro `#[test]`. Most code editors can compile and run the functions declared under the macro individually or blocks of them.
 * Test can have special compilation flags with `#[cfg(test)]`. Also executable in code editors if it contained `#[test]`, it is a good way to mock complicated functions or override traits.
 
-## 5.1 Tests as Living Documentation
+> A test verify the code.
+> A clean-test is are also easily debuggable. If they fails, they must give the maximum of information to debug.
+
+## 5.1 Testing tools
+
+### Cargo plugins
+
+#### cargo-nextest
+
+Rather use `cargo nextest run` if installed. It run tests faster than `cargo test` which run module by modules tests.
+
+#### cargo-llvm-cov
+
+You can have a test-coverage with `cargo llvm-cov`.
+
+### crates
+
+#### rstest
+
+To test a function with different parameters, you can use the lib [rstest](https://docs.rs/rstest/latest/rstest/)
+```rust
+#[rstest::rstest]
+#[case::one("1")]
+#[case::lower_a("a")]
+#[case::upper_f("F")]
+fn should_parse_str_to_hexadecimal(#[case] number_to_parse: &str) {
+  u32::from_str_radix(number_to_parse, 16)
+    .unwrap_or_else(|err| panic!("Failed to parse \"{number_to_parse}\": {err}"));
+}
+```
+
+#### mockall
+
+To mock a trait, you can use [mockall](https://docs.rs/mockall/latest/mockall/)
+
+```rust
+#[cfg_attr(test, mockall::automock)]
+trait Repository {
+  fn get_user(&self, id: u32) -> User;
+}
+
+#[test]
+fn should_get_users() {
+  // Expected
+  let expected_users = User {
+    name: "user21".to_owned(),
+  };
+
+  // Given
+  let mut repository = MockRepository::new();
+  repository
+    .expect_get_user()
+    .with(mockall::predicate::eq(21))
+    .returning(|_| User {
+      name: "user21".to_owned(),
+    })
+    .once();
+
+  let application = Application::new(repository);
+
+  // When
+  let users = application.get_users();
+
+  // Then
+  assert_eq!(users, expected_users);
+```
+
+#### pretty_assertions
+
+Print better differences with pretty_assertions, with `use pretty_assertions::{assert_eq};`
+
+Transform
+```
+thread 'main' panicked at 'assertion failed: `(left == right)`
+  left: `Some(Foo { lorem: "Hello World!", ipsum: 42, dolor: Ok("hey") })`
+ right: `Some(Foo { lorem: "Hello Wrold!", ipsum: 42, dolor: Ok("hey ho!") })`', examples/standard_assertion.rs:20:5
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+```
+
+Into
+
+![pretty_assertions diff](../images/pretty_assertions.png)
+
+#### insta
+
+cf. [Snapshot testing with cargo insta](./chapter_05.md#56-snapshot-testing-with-cargo-insta)
+
+## 5.2 Tests as Living Documentation
 
 In Rust, as in many other languages, tests often show how the functions are meant to be used. If a test is clear and targeted, it's often more helpful than reading the function body, when combined with other tests, they serve as living documentation.
 
@@ -14,12 +101,12 @@ In Rust, as in many other languages, tests often show how the functions are mean
 > In the unit test name we should see the following:
 > * `unit_of_work`: which *function* we are calling. The **action** that will be executed. This is often the name of the test `mod` where the function is being tested.
 ```rust
-#[cfg(test)] 
-mod test { 
-  mod function_name { 
-    #[test] 
-    fn returns_y_when_x() { ... } 
-  } 
+#[cfg(test)]
+mod test {
+  mod function_name {
+    #[test]
+    fn returns_y_when_x() { ... }
+  }
 }
 ```
 > * `expected_behavior`: the set of **assertions** that we need to verify that the test works.
@@ -43,7 +130,7 @@ fn process_should_return_blob_when_larger_than_b() {
     let b = Some(2);
     let expected = MyExpectedStruct { ... };
 
-    let result = process(a, b).unwrap();
+    let result = process(a, b).expect("Failed to process a & b");
 
     assert_eq!(result, expected);
 }
@@ -56,14 +143,14 @@ mod process {
       let b = Some(2);
       let expected = MyExpectedStruct { ... };
 
-      let result = process(a, b).unwrap();
+      let result = process(a, b).expect("Failed to process a & b");
 
       assert_eq!(result, expected);
   }
 }
 ```
 
-> When executing `cargo test` the test output for each option will look like:
+> When executing `cargo nextest run` the test output for each option will look like:
 > Option 1: `process_should_return_blob_when_larger_than_b`.
 > Option 2: `process::should_return_blob_when_larger_than_b`.
 
@@ -76,16 +163,15 @@ Together, that means you can use the module name to group related tests together
 ```rust
 #[cfg(test)]
 mod test {  // IDEs will provide a ▶️ button here
-
   mod process {
     #[test] // IDEs will provide a ▶️ button here
     fn returns_error_xyz_when_b_is_negative() {
         let a = setup_a_to_be_xyz();
         let b = Some(-5);
         let expected = MyError::Xyz;
-    
-        let result = process(a, b).unwrap_err();
-    
+
+        let result = process(a, b).expect_err("Process succeeded with a & b");
+
         assert_eq!(result, expected);
     }
 
@@ -95,7 +181,7 @@ mod test {  // IDEs will provide a ▶️ button here
       let b = None;
       let expected = MyError::InvalidInput;
 
-      let result = process(a, b).unwrap_err();
+      let result = process(a, b).expect_err("Process succeeded with None & None");
 
       assert_eq!(result, expected);
     }
@@ -108,66 +194,37 @@ mod test {  // IDEs will provide a ▶️ button here
 To keep tests clear, they should describe _one_ thing that the unit does.
 This makes it easier to understand why a test is failing.
 
-#### ❌ Don't test multiple things in the same test
+❌ Don't test multiple things in the same test
+
 ```rust
 fn test_thing_parser(...) {
-  assert!(Thing::parse("abcd").is_ok());
-  assert!(Thing::parse("ABCD").is_err());
+  Thing::parse("abcd").expect("Failed to parse \"abcd\" into Thing");
+  Thing::parse("ab").expect("Failed to parse \"ab\" into Thing");
+  Thing::parse("ABCD").expect_err("Succeeded to parse \"ABCD\" into Thing");
 }
 ```
 
-#### ✅ Test one thing per test
+✅ Test one thing per test
+
 ```rust
 #[cfg(test)]
 mod test_thing_parser {
-  #[test]
-  fn lowercase_letters_are_valid() {
-    assert!(
-      Thing::parse("abcd").is_ok(),
-      // Works like `eprintln`, `format` and `println` macros
-      "Thing parse error: {:?}", 
-      Thing::parse("abcd").unwrap_err()
-    );
+  #[rstest::rstest]
+  #[case::ab("ab")]
+  #[case::abcd("abcd")]
+  fn lowercase_letters_are_valid(#[case] string_to_parse: &str) {
+    Thing::parse(string_to_parse).unwrap_or_else(|| panic!("Failed to parse \"{string_to_parse}\" into Thing"),
   }
 
   #[test]
   fn capital_letters_are_invalid() {
-    assert!(Thing::parse("ABCD").is_err());
+    Thing::parse("ABCD").expect_err("Succeed to parse \"ABCD\" into Thing");
   }
-}
-```
-
-> `Ok` scenarios should have an `eprintln` of the `Err` case.
-
-### Use very few, ideally one, assertion per test
-
-When there are multiple assertions per test, it's both harder to understand the intended behavior and 
-often requires many iterations to fix a broken test, as you work through assertions one by one.
-
-❌ Don't include many assertions in one test:
-
-```rust
-#[test]
-fn test_valid_inputs() {
-  assert!(the_function("a").is_ok());
-  assert!(the_function("ab").is_ok());
-  assert!(the_function("ba").is_ok());
-  assert!(the_function("bab").is_ok());
 }
 ```
 
 If you are testing separate behaviors, make multiple tests each with descriptive names.
 To avoid boilerplate, either use a shared setup function or [rstest](https://crates.io/crates/rstest) cases *with descriptive test names*:
-```rust
-#[rstest]
-#[case::single("a")]
-#[case::first_letter("ab")]
-#[case::last_letter("ba")]
-#[case::in_the_middle("bab")]
-fn the_function_accepts_all_strings_with_a(#[case] input: &str) {
-  assert!(the_function(input).is_ok());
-}
-```
 
 > Considerations when using `rstest`
 >
@@ -176,7 +233,43 @@ fn the_function_accepts_all_strings_with_a(#[case] input: &str) {
 
 > ❗ Share **setup**, not the test itself: keep each test's action and assertion inline, even when repetitive. Tests tolerate duplication better than production code — see [Chapter 1, §1.8](chapter_01.md#-test-code-readability-beats-dry).
 
-## 5.2 Add Test Examples to your Docs
+### Use very few assertion per test
+
+When there are multiple assertions per test, it's harder to understand the intended behavior and
+often requires many iterations to fix a broken test, as you work through assertions one by one.
+
+> This would break the clean-test easily debuggable.
+
+❌ Don’t test struct fields one by one
+
+```rust
+#[test]
+fn should_create_nominal_user() {
+  // ...
+
+  assert_eq!(user.name, expected_user.name);
+  assert_eq!(user.email, expected_user.email);
+}
+```
+
+✅ Rather check all element at once, to have the maximum of information if the test fails
+
+```rust
+// #[cfg_attr(test, derive(Debug, PartialEq))]
+// struct User { .. }
+
+#[test]
+fn should_create_nominal_user() {
+  // ...
+
+  assert_eq!(user, expected_user);
+
+  // or if some fields must not be tested (eg. updated_time)
+  std::assert_matches!(user, User { name, email, .. } if name == "doe" && email == "john@doe.com");
+}
+```
+
+## 5.3 Add Test Examples to your Docs
 
 We will deep dive into docs at a later stage, so in this section we will just briefly go over how to add tests to your docs. Rustdoc can turn examples into executable tests using `///` with a few advantages:
 
@@ -187,19 +280,19 @@ We will deep dive into docs at a later stage, so in this section we will just br
 
 ```rust
 /// Helper function that adds any two numeric values together.
-/// This function reasons about which would be the correct type to parse based on the type 
+/// This function reasons about which would be the correct type to parse based on the type
 /// and the size of the numeric value.
-/// 
+///
 /// # Examples
-/// 
+///
 /// ```rust
 /// # use crate_name::generic_add;
 /// use num::numeric;
-/// 
+///
 /// # assert_eq!(
 /// generic_add(5.2, 4) // => 9.2
 /// # , 9.2)
-/// 
+///
 /// # assert_eq!(
 /// generic_add(2, 2.0) // => 4
 /// # , 4)
@@ -214,7 +307,7 @@ generic_add(5.2, 4) // => 9.2
 generic_add(2, 2.0) // => 4
 ```
 
-## 5.3 Unit Test vs Integration Tests vs Doc tests
+## 5.4 Unit Test vs Integration Tests vs Doc tests
 
 As a general rule, without delving into *test pyramid naming*, rust has 3 sets of tests:
 
@@ -226,7 +319,7 @@ Tests that go in the **same module** as the **tested unit** was declared, this a
 * They should test for errors and edge cases.
 * Different tests of the same unit can be combined under a single `#[cfg(test)] mod test_unit_of_work {...}`, allowing multiple submodules for different `units_of_work`.
 * Try to keep external states/side effects to your API to minimum and focus those tests on the `mod.rs` files.
-* Tests that are not yet fully implemented can be ignored with the `#[ignore = "optional message"]` attribute.
+* Tests that are not yet fully implemented can be ignored with the `#[ignore = "optional message (but rather give an explanation)"]` attribute.
 * Tests that intentionally panic should be annotated with the attribute `#[should_panic]`.
 
 ```rust
@@ -245,7 +338,7 @@ mod unit_of_work_tests {
 
 ### Integration Tests
 
-Tests that go under the `tests/` directory, they are entirely external to your library and use the same code as any other code would use, not have access to private and crate level functions, which means they can **only test** functions on your **public API**. 
+Tests that go under the `tests/` directory, they are entirely external to your library and use the same code as any other code would use, not have access to private and crate level functions, which means they can **only test** functions on your **public API**.
 
 > Their purpose is to test whether many parts of the code work together correctly, units of code that work correctly on their own could have problems when integrated.
 
@@ -254,14 +347,14 @@ Tests that go under the `tests/` directory, they are entirely external to your l
 * if testing binaries, try to break **executable** and **functions** into `src/main.rs` and `src/lib.rs`, respectively.
 
 ```
-├── Cargo.lock 
-├── Cargo.toml 
-├── src 
-│   └── lib.rs 
-└── tests 
-    ├── mod.rs 
-    ├── common 
-    │   └── mod.rs 
+├── Cargo.lock
+├── Cargo.toml
+├── src
+│   └── lib.rs
+└── tests
+    ├── mod.rs
+    ├── common
+    │   └── mod.rs
     └── integration_test.rs
 ```
 
@@ -276,10 +369,10 @@ As mentioned in section [5.2](#52-add-test-examples-to-your-docs), doc tests sho
 * `no_run`: compiles but doesn't execute the code, similar to `cargo check`. Very useful when dealing with side-effects for documentation.
 * `compile_fail`: Test rustdoc that this block should cause a compilation fail, important when you want to demonstrate wrong use cases.
 
-## 5.4 How to `assert!`
+## 5.5 How to `assert!`
 
 Rust comes with 2 macros to make assertions:
-* `assert!` for asserting boolean values like `assert!(value.is_ok(), "'value' is not Ok: {value:?}")`
+* `assert!` for asserting boolean values like `assert!(value.is_none(), "{value:?} is not None")`
 * `assert_eq!` for checking equality between two different values, `assert_eq!(result, expected, "'result' differs from 'expected': {}", result.diff(expected))`.
 
 ### 🚨 `assert!` reminders
@@ -295,11 +388,8 @@ use std::assert_matches::assert_matches;
 assert_matches!(error, MyError::BadInput(_));
 ```
 * Use `#[should_panic]` wisely. It should only be used when panic is the desired behavior, prefer result instead of panic.
-* There are some other that can enhance your testing experience like:
-    * [`rstest`](https://crates.io/crates/rstest): fixture based test framework with procedural macros.
-    * [`pretty_assertions`](https://crates.io/crates/pretty_assertions): overrides `assert_eq` and `assert_ne`,  and creates colorful diffs between them.
 
-## 5.5 Snapshot Testing with `cargo insta`
+## 5.6 Snapshot Testing with `cargo insta`
 
 > When correctness is visual or structural, snapshots tell the story better than asserts.
 
@@ -345,14 +435,14 @@ Snapshot testing compares your output (text, Json, HTML, YAML, etc) against a sa
 * Flaky tests, randomly generated output, unless redacted.
 * Snapshots of external resources, use mocks and stubs.
 
-## 5.6 ✅ Snapshot Best Practices
+## 5.7 ✅ Snapshot Best Practices
 
 * Named snapshots, it gives meaningful snapshot files names, e.g. `snapshots/this_is_a_named_snapshot.snap`
 ```rust
 assert_snapshot!("this_is_a_named_snapshot", output);
 ```
 
-* Keep snapshots small and clear. 
+* Keep snapshots small and clear.
 ```rust
 // ✅ Best case:
 assert_snapshot!("app_config/http", whole_app_config.http);
@@ -361,7 +451,7 @@ assert_snapshot!("app_config/http", whole_app_config.http);
 assert_snapshot!("app_config", whole_app_config); // Huge object
 ```
 
-> #### 🚨 Avoid snapshotting huge objects 
+> #### 🚨 Avoid snapshotting huge objects
 > Huge objects become hard to review and reason about.
 
 * Avoid snapshotting simple types (primitives, flat enums, small structs):
