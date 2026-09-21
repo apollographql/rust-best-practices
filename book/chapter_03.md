@@ -7,9 +7,9 @@ The **golden rule** of performance work:
 Rust code is often already pretty fast - don't "optimize" without evidence. Optimize only after finding bottlenecks.
 
 ### A good first steps
-* Use `--release` flag on you builds (might sound dummy, but it is quite common to hear people complaining that their Rust code is slower than their X language code, and 99% of the time is because they didn't use the `--release` flag).
+* Use `--release` flag on your builds (might sound dummy, but it is quite common to hear people complaining that their Rust code is slower than their X language code, and 99% of the time is because they didn't use the `--release` flag).
 * `$ cargo clippy -- -D clippy::perf` gives you important tips on best practices for performance.
-* [`cargo bench`](https://doc.rust-lang.org/cargo/commands/cargo-bench.html) is a cargo tool to create micro-benchmarks and test different code solutions. Write a test scenario and bench you solution against the original code, if your improvement is larger than 5%, might be a good performance improvement.
+* [`cargo bench`](https://doc.rust-lang.org/cargo/commands/cargo-bench.html) is a cargo tool to create micro-benchmarks and test different code solutions. Write a test scenario and bench your solution against the original code, if your improvement is larger than 5%, might be a good performance improvement.
 * [`cargo flamegraph`](https://github.com/flamegraph-rs/flamegraph) a powerful profiler for Rust code. For MacOS, [samply](https://github.com/mstange/samply) might be a better DX option.
 
 > #### Further reading on Benchmarking:
@@ -127,7 +127,7 @@ In sections [Borrowing over Cloning](./chapter_01.md#11-borrowing-over-cloning) 
     }
     ```
 * You have reference counted pointers (`Arc, Rc`).
-* You have small structs that are to big to `Copy` but as costly as `std::collections`. An example is HTTP client like `hyper_util::client::legacy::Client` that cloning allows you to share the connection pool.
+* You have small structs that are too big to `Copy` but as costly as `std::collections`. An example is HTTP client like `hyper_util::client::legacy::Client` that cloning allows you to share the connection pool.
 * You have a chained struct modifier that needs owned mutation, some **builders** require owned mutation, but most custom builders can be done with `pub fn with_xyz(&mut self, value: Xyz) -> &mut Self`.
 ```rust
 // Inline `HashMap` insertion extension

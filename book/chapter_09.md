@@ -27,7 +27,7 @@ Rust tracks pointers using `Send` and `Sync` traits:
 | `&T`             	| Shared reference                                                          	| Yes                                 	| Shared access      |
 | `&mut T`         	| Exclusive mutable reference                                               	| No, not Send                         	| Exclusive mutation |
 | `Box<T>`         	| Heap-allocated owning pointer                                             	| Yes, if T: Send + Sync               	| Heap allocation    |
-| `RC<T>`          	| Single-threaded ref counted pointer                                       	| No, neither                          	| Multiple owners (single-thread) |
+| `Rc<T>`          	| Single-threaded ref counted pointer                                       	| No, neither                          	| Multiple owners (single-thread) |
 | `Arc<T>`         	| Atomic ref counter pointer                                                	| Yes                                  	| Multiple owners (multi-thread) |
 | `Cell<T>`        	| Interior mutability for copy types                                        	| No, not Sync                         	| Shared mutable, non-threaded |
 | `RefCell<T>`     	| Interior mutability (dynamic borrow checker)                              	| No, not Sync                         	| Shared mutable, non-threaded |
@@ -37,7 +37,7 @@ Rust tracks pointers using `Send` and `Sync` traits:
 | `LazyCell<T>`    	| A lazy version of `OnceCell<T>` that calls function closure to initialize 	| No, not Sync                         	| Complex lazy value initialization 
 | `OnceLock<T>`    	| Thread-safe version of `OnceCell<T>`                                      	| Yes                                  	| Multi-thread single init |
 | `LazyLock<T>`    	| Thread-safe version of  `LazyCell<T>`                                     	| Yes                                  	| Multi-thread complex init	|
-| `*cont T/*mut T` 	| Raw Pointers                                                              	| No, user must ensure safety manually 	| Raw memory / FFI |
+| `*const T/*mut T` 	| Raw Pointers                                                              	| No, user must ensure safety manually 	| Raw memory / FFI |
 
 ## 9.2 When to use pointers:
 
@@ -46,7 +46,7 @@ Rust tracks pointers using `Send` and `Sync` traits:
 Probably the most common type in a Rust code base, it is **Safe, with no mutation** and allows **multiple readers**.
 
 ```rust
-let data: String = String::from_str("this a string").unwrap();
+let data: String = String::from_str("this is a string").unwrap();
 
 print_len(&data);
 print_capacity(&data);
@@ -69,7 +69,7 @@ fn print_bytes(s: &String) {
 Probably the most common *mutable* type in a Rust code base, it is **Safe, but only allows one mutable borrow at a time**.
 
 ```rust
-let mut data: String = String::from_str("this a string").unwrap();
+let mut data: String = String::from_str("this is a string").unwrap();
 mark_update(&mut data);
 
 fn mark_update(s: &mut String) {
@@ -95,11 +95,11 @@ You need multiple references to data in a single thread. Most common example is 
 
 ### [`Arc<T>`](https://doc.rust-lang.org/std/sync/struct.Arc.html) - Atomic Reference Counter (multi-thread)
 
-You need multiple references to data in multiple threads. Most common use cases is sharing readonly Vec across thread with `Arc<[T]>` and wrapping a `Mutex` so it can be easily shared across threads, `Arc<Mutex<T>>`.
+You need multiple references to data in multiple threads. Most common use case is sharing readonly Vec across thread with `Arc<[T]>` and wrapping a `Mutex` so it can be easily shared across threads, `Arc<Mutex<T>>`.
 
 ### [`RefCell<T>`](https://doc.rust-lang.org/std/cell/struct.RefCell.html) - Runtime checked interior mutability
 
-Used when you need shared access and the ability to mutate date, borrow rules are enforced at runtime. **It may panic!**.
+Used when you need shared access and the ability to mutate data, borrow rules are enforced at runtime. **It may panic!**.
 
 ```rust
 use std::cell::RefCell;
@@ -198,8 +198,8 @@ fn main() {
     };
 
 
-    println!("CHild 1: {child_1:?}");
-    println!("CHild 2: {child_2:?}");
+    println!("Child 1: {child_1:?}");
+    println!("Child 2: {child_2:?}");
 }
 ```
 
