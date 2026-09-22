@@ -1,5 +1,5 @@
 [package]
-name = "type-state-builder"
+name = "required-constructor"
 version = "0.1.0"
 edition = "2024"
 

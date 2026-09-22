@@ -49,7 +49,9 @@ jobs:
           user = os.getenv('CONF_USER')
           token = os.getenv('CONF_TOKEN')
 
-          print(f"({user}:{token})")
+          # Never print credentials: log masking only redacts exact secret
+          # values, so transformed or partial output can still leak them.
+          print(f"Confluence credentials present: {bool(user and token)}")
           workspace = os.getenv('GITHUB_WORKSPACE')
           print(f"Workspace: `{workspace}`")
 
