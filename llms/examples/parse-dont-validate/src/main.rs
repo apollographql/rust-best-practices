@@ -177,7 +177,7 @@ mod tests {
             prop_assert_eq!(parsed, listener);
         }
 
-        /// Semantic oracle: an independent URL parser recovers the host and port.
+        /// Semantic check: URL parsing recovers the host and port (shared host grammar).
         #[test]
         fn url_preserves_host_and_port(listener in listener()) {
             let parsed = Url::parse(&url(&listener)).expect("url() emits a valid URL");
