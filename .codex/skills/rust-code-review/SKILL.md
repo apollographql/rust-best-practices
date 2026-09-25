@@ -11,6 +11,6 @@ Trace changed behavior from input boundary through domain decisions, effects, an
 
 Report actionable findings with a concrete trigger, consequence, and source location. Prioritize by impact and likelihood, not a fixed mapping from syntax to severity. Distinguish demonstrated defects from design alternatives; do not frame an unmeasured clone or stylistic preference as a performance regression.
 
-Review the tests' oracle, setup, and observations: could they pass without exercising the claimed behavior? Consult [testing](../../../book/chapter_05.md) and [verification](../../../book/chapter_02.md). Report checks run and remaining uncertainty; green tools do not prove domain correctness. Avoid repeating mechanical diagnostics already supplied by tooling.
+Review the tests' oracle, setup, and observations: could they pass without exercising the claimed behavior? Consult [testing](../../../llms/testing.md) and [verification](../../../llms/verification.md). Report checks run and remaining uncertainty; green tools do not prove domain correctness. Avoid repeating mechanical diagnostics already supplied by tooling.
 
 Recommend the narrowest structural fix for a demonstrated bug class. Seek steering before redesigning domain or ownership boundaries; review alone does not authorize implementation.

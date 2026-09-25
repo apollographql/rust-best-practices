@@ -8,14 +8,14 @@
 - **Make illegal states unrepresentable.** Product = coexistence, sum = alternatives; data lives in its variant. Payload enums, concrete state types, consuming transitions. Newtype when an invariant or semantic distinction makes substitution a mistake.
 - **Declare intent; delegate mechanics.** Installed deps and their extension points first, then established crates over DIY parsing, protocols, encoding, CLI, test infra. Policy and safety guards stay explicit.
 - **Ownership before synchronization.** Borrow for access, move for transfer, clone for another owner; optimize costly duplication with evidence. Every resource/task has a named owner, cancellation path, teardown. Completion ≠ outcome: observe results and panics, not just shutdown.
-- **Structural fix.** Find the invariant and the narrowest authoritative boundary that enforces it; fix the bug class, test the general behavior. No speculative architecture.
+- **Structural fix: invariant preservation.** Enforce at the narrowest authoritative boundary; fix the bug class, test the general behavior. No speculative architecture.
 - **Share knowledge, not syntax** (DRY is about knowledge). Duplication beats the wrong abstraction: flag args encoding unrelated callers → inline, re-extract the real commonality.
 - **Preserve failure meaning.** `thiserror` variants where callers branch; `anyhow` context at reporting boundaries. Fallbacks, retries, defaults are explicit policy; retry ≠ rollback.
 - **Property testing with `proptest`.** Optimized/custom algorithm → differential test against a slow, simple, independent oracle. Serialization → round-trip domain values through the real pipeline. Round trip ≠ compatibility.
 - **Test the lifecycle.** Readiness, effects, failure, cancellation, teardown. Sleep is not synchronization.
 - **Tools own mechanics.** Compiler/rustfmt/Clippy own checkable syntax; review owns invariants, ownership, compatibility, oracles. `cargo check` early; read the whole diagnostic.
-- **APIs from installed source, not memory.** Memory lags releases and misses feature gates. `Cargo.lock` → local source (`~/.cargo/registry/src`) or `cargo doc` → official `llms.txt`/`llms.md` if live → canonical docs.
-- **Steer consequential design.** Human reachable + hard-to-reverse or non-dominated choice → read `collaboration.md` first.
+- **APIs from installed source, not memory.** Check versions/features: `Cargo.lock` → local source (`~/.cargo/registry/src`) or `cargo doc` → official `llms.txt`/`llms.md` if live → canonical docs.
+- **Steer consequential design.** Contracts, ownership/concurrency, crate boundaries, new deps, or Pareto tradeoffs → read `llms/collaboration.md` before choosing; headless ≠ extra authority.
 
 ## Drift → instead
 
@@ -34,14 +34,14 @@
 
 Local checkout of this guide → read files there. Otherwise fetch `https://raw.githubusercontent.com/apollographql/rust-best-practices/main/<path>`.
 
-- Params, borrow vs clone, abstraction smells, CLI/format/protocol crate choice → `book/chapter_01.md`
-- Which checks, feature matrix, lint exceptions → `book/chapter_02.md`
-- Slow, allocating, large, or needs perf evidence → `book/chapter_03.md`
-- Error types, context, retries, partial effects, panics → `book/chapter_04.md`
-- Test design, algorithm/codec oracles, async/protocol tests, snapshots, test seams → `book/chapter_05.md`
-- Enum vs trait, generics vs `dyn`, async traits, public extensibility → `book/chapter_06.md`
-- Raw input → domain types, flag/optional-field combinations, state transitions, builders, stale checks → `book/chapter_07.md`
-- Rustdoc, comments, `SAFETY:`, config naming → `book/chapter_08.md`
-- Shared state, locks, spawn/cancel/shutdown, backpressure, unsafe/FFI → `book/chapter_09.md`
-- Worked perimeter parsing + oracles → `examples/parse-dont-validate/src/main.rs`
-- Design decisions with a human → `collaboration.md`
+- Params, borrow vs clone, abstraction smells, CLI/format/protocol crate choice → `llms/idioms.md`
+- Which checks, feature matrix, lint exceptions → `llms/verification.md`
+- Slow, allocating, large, or needs perf evidence → `llms/performance.md`
+- Error types, context, retries, partial effects, panics → `llms/errors.md`
+- Test design, algorithm/codec oracles, async/protocol tests, snapshots, test seams → `llms/testing.md`
+- Enum vs trait, generics vs `dyn`, async traits, public extensibility → `llms/dispatch.md`
+- Raw input → domain types, flag/optional-field combinations, state transitions, builders, stale checks → `llms/state.md`
+- Rustdoc, comments, `SAFETY:`, config naming → `llms/documentation.md`
+- Shared state, locks, spawn/cancel/shutdown, backpressure, unsafe/FFI → `llms/concurrency.md`
+- Worked perimeter parsing + oracles → `llms/examples/parse-dont-validate/src/main.rs`
+- Design decisions with a human → `llms/collaboration.md`

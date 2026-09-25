@@ -1,11 +1,12 @@
-# References
+# Final notes
 
-Anchor sources, for judgment rather than API lookup; use installed versions for APIs.
+* Rust doesn’t prevent mistakes; it makes it easier to catch them early.
+* The compiler is not your enemy, it is a powerful tool. Think of it as your best friend.
+* Keep learning, every new Rust version has interesting new features to look out for and every edition brings major improvements.
+* Keep an eye on [Rust blog](https://blog.rust-lang.org/) for new versions
+* [Rust Official API Guidelines](https://rust-lang.github.io/api-guidelines/about.html)
+* [Rust Analyzer Style Guide](https://rust-analyzer.github.io/book/contributing/style.html)
 
-- [Parse, don't validate](https://lexi-lambda.github.io/blog/2019/11/05/parse-don-t-validate/) — Alexis King
-- [The Wrong Abstraction](https://sandimetz.com/blog/2016/1/20/the-wrong-abstraction) — Sandi Metz
-- [Rust API Guidelines](https://rust-lang.github.io/api-guidelines/about.html)
-- [Rust Reference](https://doc.rust-lang.org/reference/)
-- [Rustonomicon](https://doc.rust-lang.org/nomicon/): unsafe and soundness
-- [Rust Atomics and Locks](https://marabos.nl/atomics/)
-- [rust-analyzer style guide](https://rust-analyzer.github.io/book/contributing/style.html)
+## Similar projects
+
+* [mre/idiomatic-rust](https://github.com/mre/idiomatic-rust/tree/master)

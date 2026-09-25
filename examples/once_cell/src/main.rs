@@ -1,40 +1,28 @@
-use std::cell::OnceCell;
+#![allow(dead_code)]
+use std::{cell::OnceCell, rc::Rc};
 
-struct Document {
-    text: String,
-    word_count: OnceCell<usize>,
-}
-
-impl Document {
-    fn new(text: String) -> Self {
-        Self {
-            text,
-            word_count: OnceCell::new(),
-        }
-    }
-
-    fn word_count(&self) -> usize {
-        *self
-            .word_count
-            .get_or_init(|| self.text.split_whitespace().count())
-    }
+#[derive(Debug, Default)]
+struct MyStruct {
+    distance: usize,
+    root: Option<Rc<OnceCell<MyStruct>>>,
 }
 
 fn main() {
-    let document = Document::new("deferred local computation".to_owned());
-    println!("{} words", document.word_count());
-}
-
-#[cfg(test)]
-mod tests {
-    use super::Document;
-
-    #[test]
-    fn word_count_is_initialized_on_demand() {
-        let document = Document::new("  two\nwords  ".to_owned());
-        assert!(document.word_count.get().is_none());
-        assert_eq!(document.word_count(), 2);
-        assert_eq!(document.word_count.get(), Some(&2));
-        assert_eq!(document.word_count(), 2);
+    let root = MyStruct::default();
+    let root_cell = Rc::new(OnceCell::new());
+    if let Err(previous) = root_cell.set(root) {
+        eprintln!("Previous Root {previous:?}");
     }
+    let child_1 = MyStruct {
+        distance: 1,
+        root: Some(root_cell.clone()),
+    };
+
+    let child_2 = MyStruct {
+        distance: 2,
+        root: Some(root_cell),
+    };
+
+    println!("CHild 1: {child_1:?}");
+    println!("CHild 2: {child_2:?}");
 }

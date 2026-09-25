@@ -1,30 +1,222 @@
-# Chapter 7 — State and Invariants
+# Chapter 7 - Type State Pattern
 
-## Parse, don't validate
+Models state at compile time, preventing bugs by making illegal states unrepresentable. It takes advantage of the Rust generics and type system to create sub-types that can only be reached if a certain condition is achieved, making some operations illegal at compile time.
 
-The perimeter (CLI, HTTP, config, files, env, DB rows, FFI) parses raw input into domain types; the interior takes only domain types and never re-checks. `fn send(to: &Email)`, not `fn send(to: &str) // must be valid`. Anti-patterns: shotgun parsing (checks scattered through the core); boolean blindness (`is_valid(&x) -> bool` discards the evidence, so every consumer re-checks or trusts).
+> Recently it became the standard design pattern of Rust programming. However, it is not exclusive to Rust, as it is achievable and has inspired other languages to do the same [swift](https://swiftology.io/articles/typestate/) and [typescript](https://catchts.com/type-state).
 
-- Mechanisms: `TryFrom`, `FromStr`, smart constructors. Private fields, so construction, mutation, deserialization, and conversion all preserve the invariant.
-- Deserialization: wire type + `#[serde(try_from = "Raw")]` (+ `into = "Raw"` to serialize) ([example](../examples/parse-dont-validate/src/main.rs)). A plain `#[derive(Deserialize)]` on a domain type bypasses its constructor.
-- Reuse constrained types: `NonZeroU16`, `SocketAddr`, `IpAddr`, `Duration`, `url::Url`, `uuid::Uuid`, `semver::Version`. Name by guarantee (`Port`, `TenantId`) over `ValidatedX` when a domain name exists.
+## 7.1 What is Type State Pattern?
 
-## Make illegal states unrepresentable
+**Type State Pattern** is a design pattern where you encode different **states** of the system as **types**, not as runtime flags or enums. This allows the compiler to enforce state transitions and prevent illegal actions at compile time. It also improves the developer experience, as developers only have access to certain functions based on the state of the type.
 
-- Product = coexistence, sum = alternatives. `(Option<A>, Option<B>)` has four states; exactly one valid → `enum { A(A), B(B) }`; both valid too → add `Both(A, B)`. Required data lives in its variant.
-- `Option`/`Result` when absence or failure is the concept. `bool` params/fields naming a domain choice → enum (`Mode::Strict` over `true` at call sites); plain predicates stay `bool`.
-- Newtypes against primitive obsession when an invariant or semantic distinction makes substitution a mistake (IDs, units, validated strings); not for every primitive.
-- List variants instead of `_ =>` when a new variant should force reconsidering the decision; `_` may deliberately group irrelevant alternatives. Downstream matches on a `#[non_exhaustive]` enum require `_`.
-- Let state carry its data: `Connected { socket }`, not `state: State` + `socket: Option<Socket>`. Existing types may already be the state: an open `File` is the opened state ([open handle](../examples/open-handle/src/main.rs)); a wrapper must add a real guarantee.
+> Invalid states become compile errors instead of runtime bugs.
 
-## Transitions consume their source
+## 7.2 Why use it?
 
-- `self`-consuming methods retire the prior state's capabilities. Concrete per-state types or an enum first; typestate generics (`Conn<S>`) only for composability or a guarantee concrete types can't give. Carry state data directly, never `PhantomData` + `Option` + `unreachable!`.
-- Runtime-determined state (events, callbacks, shared ownership) → payload enum owned by one component; change state and its data together, under one lock or task.
-- Consuming a value can't revoke clones, remote tokens, or other processes' views.
-- Failed transitions: choose explicitly between returning the original (`Err((self, e))`), a recovery state, or releasing resources.
-- Builders are an API choice, not a typestate showcase. Few required fields → constructor args ([required constructor](../examples/required-constructor/src/main.rs)); substantial builders → `bon` or `typed-builder`.
+* Avoids runtime checks for state validity. If you reach certain states, you can make certain assumptions of the data you have.
+* Models state transitions as type transitions. This is similar to a state machine, but in compile time.
+* Prevents data misuse, e.g. using uninitialized objects.
+* Improves API safety and correctness.
+* The phantom data field is removed after compilation so no extra memory is allocated.
 
-## Authority boundary
+## 7.3 Simple Example: File State
 
-- A parse proves shape at parse time, not authority: authorization depends on actor, action, resource, and current policy at use. TOCTOU: an open handle doesn't freeze contents; a checked path can change before use. Identify who produces, mutates, and authoritatively validates data before promising freshness.
-- Distinguish peer claims, negotiated state, and locally supported behavior. Guard safety- and capability-critical boundaries explicitly even when a dependency overlaps, citing its contract; not a mandate to re-check every dependency.
+[Github Example](https://github.com/apollographql/rust-best-practices/tree/main/examples/simple-type-state)
+```rust
+use std::{io, path::{Path, PathBuf}};
+
+struct FileNotOpened;
+struct FileOpened;
+
+#[derive(Debug)]
+struct File<State> {
+    /// Path to the opened file
+    path: PathBuf,
+    /// Open `File` handler
+    handle: Option<std::fs::File>,
+    /// Type state manager
+    _state: std::marker::PhantomData<State>
+}
+
+impl File<FileNotOpened> {
+    /// `open` is the only entry point for this struct.
+    /// * When called with a valid path, it will return a `File<FileOpened>` with a valid `handler` and `path`
+    /// * `open` serves as an alternative to `new` and `defaults` methods (usable when your struct needs valid data to exist).
+    fn open(path: &Path) -> io::Result<File<FileOpened>> {
+        // If file is invalid, it will return `std::io::Error`
+        let file = std::fs::File::open(path)?;
+        Ok(
+            File {
+                path: path.to_path_buf(),
+                // Always valid
+                handle: Some(file),
+                _state: std::marker::PhantomData::<FileOpened>
+            }
+        )
+    }
+}
+
+impl File<FileOpened> {
+    /// Reads the content of the `File` as a `String`.
+    /// `read` can only be called by state `File<FileOpened>`
+    fn read(&mut self) -> io::Result<String> {
+        use io::Read;
+
+        let mut content = String::new();
+        let Some(handle)=  self.handle.as_mut() else {
+            unreachable!("Safe to unwrap as state can only be reached when file is open");
+        };
+        handle.read_to_string(&mut content)?;
+        Ok(content)
+    }
+
+    /// Returns the valid path buffer.
+    fn path(&self) -> &PathBuf {
+        &self.path
+    }
+}
+```
+
+## 7.4 Real-World Examples
+
+### Builder Pattern with Compile-Time Guarantees
+
+> Forces the user to **set required fields** before calling `.build()`.
+
+[Github Example](https://github.com/apollographql/rust-best-practices/tree/main/examples/type-state-builder)
+
+A type-state pattern can have more than one associated states:
+
+```rust
+use std::marker::PhantomData;
+
+struct Unset;
+struct Set;
+
+#[derive(Debug)]
+struct Person {
+    name: String,
+    age: u8,
+    email: Option<String>,
+}
+
+struct Builder<NameState = Unset, AgeState = Unset> {
+    name: Option<String>,
+    age: u8,
+    email: Option<String>,
+    _maker_state: PhantomData<(NameState, AgeState)>,
+}
+
+impl Builder<Unset, Unset> {
+    const fn new() -> Self {
+        Self { name: None, age: 0, email: None, _maker_state: PhantomData }
+    }
+}
+
+impl<NameState> Builder<NameState, Unset> {
+    fn age(self, age: u8) -> Builder<NameState, Set> {
+        Builder { age, name: self.name, email: self.email, _maker_state: PhantomData }
+    }
+}
+
+impl<AgeState> Builder<Unset, AgeState> {
+    fn name(self, name: String) -> Builder<Set, AgeState> {
+        Builder { name: Some(name), age: self.age, email: self.email, _maker_state: PhantomData }
+    }
+}
+
+impl<NameState, AgeState> Builder<NameState, AgeState> {
+    fn email(self, email: String) -> Self {
+        Self { name: self.name, age: self.age, email: Some(email), _maker_state: PhantomData }
+    }
+}
+
+impl Builder<Set, Set> {
+    fn build(self) -> Person {
+        Person {
+            name: self.name.unwrap_or_else(|| unreachable!("Name is guaranteed to be set")),
+            age: self.age,
+            email: self.email,
+        }
+    }
+}
+```
+
+Although a bit more verbose than a usual builder, this guarantees that all necessary fields are present (note that e-mail is optional field only present in the final builder).
+
+#### Usage:
+```rust
+// ✅ Valid cases
+let person: Person = Builder::new().name("name".to_string()).age(30).build();
+let person: Person = Builder::new().age(30).name("name".to_string()).build();
+let person: Person = Builder::new().age(30).name("name".to_string()).email("myself@email.com".to_string()).build();
+
+// ❌ Invalid cases
+let person: Person = Builder::new().name("name".to_string()).build(); // ❌ Compile error: Age required to `build`
+let person: Person = Builder::new().age(30).build(); // ❌ Compile error:  Name required to `build`
+let person: Person = Builder::new().age(30).email("myself@email.com".to_string()).build(); // ❌ Compile error:  Name required to `build`
+let person: Person = Builder::new().age(10).age(15); // ❌ Compile error:  Age was already set
+let person: Person = Builder::new().build();// ❌ Compile error:  Name and Age required to `build`
+```
+
+### Crates implementing Builder pattern
+
+Some libraries are already implementing the builder pattern, like [bon-rs](https://docs.rs/bon/latest/bon/)
+
+### Network Protocol State Machine
+
+Illegal transitions like sending a message before connecting **simply don't compile**:
+
+```rust
+// Mock example
+struct Disconnected;
+struct Connected;
+
+struct Client<State> {
+    stream: Option<std::net::TcpStream>,
+    _state: std::marker::PhantomData<State>
+}
+
+impl Client<Disconnected> {
+    fn connect(addr: &str) -> std::io::Result<Client<Connected>> {
+        let stream = std::net::TcpStream::connect(addr)?;
+        Ok(Client {
+            stream: Some(stream),
+            _state: std::marker::PhantomData::<Connected>
+        })
+    }
+}
+
+impl Client<Connected> {
+    fn send(&mut self, msg: &str) {
+        use std::io::Write;
+        let Some(stream) = self.stream.as_mut() else {
+            unreachable!("Stream is guaranteed to be set");
+        };
+        stream.write_all(msg.as_bytes())
+    }
+}
+```
+
+## 7.5 Pros and Cons
+
+### ✅ Use Type-State Pattern When:
+* You want **compile-time state safety**.
+* You need to enforce **API constraints**.
+* You are writing a library/crate that is heavily dependent on variants.
+* You want to replace runtime booleans or enums with **type-safe code paths**.
+* You need compile time correctness.
+
+### ❌ Avoid it when:
+* Writing trivial states like enums.
+* Don't need type-safety.
+* When it leads to overcomplicated generics.
+* When runtime flexibility is required.
+
+### 🚨 Downsides and Cautions
+* Can lead to more **verbose solutions**.
+* Can lead to **complex type signatures**.
+* May require **unsafe** to return **variant outputs** based on different states.
+* May require a bunch of duplication (e.g. same struct field reused).
+* PhantomData is not intuitive for beginners and can feel a bit hacky.
+
+> Use this pattern when it **saves bugs, increases safety or simplifies logic**, not just for cleverness.
