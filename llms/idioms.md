@@ -18,7 +18,7 @@ Inspect installed deps/extension points first. Select for maintenance, adoption,
 Defaults to evaluate, not impose:
 
 - **CLI:** `clap` for help/subcommands/constraints (`Parser`, payload `Subcommand`, `ValueEnum`, `ArgGroup`); `argh` for smaller derive; `pico-args` for minimal parsing without help. No parallel argv/help. Flags/defaults/env names are public API; parse cross-field invariants into domain types.
-- **Formats:** `serde` + the format crate (`serde_json`, `toml`). `#[serde(try_from = "Raw")]` when deserialization alone doesn't establish invariants ([example](examples/parse-dont-validate/src/main.rs)). Know what `default`, `flatten`, `untagged`, `deny_unknown_fields` actually do.
+- **Formats:** `serde` + the format crate (`serde_json`, `toml`). `#[serde(try_from = "Raw")]` when deserialization alone doesn't establish invariants. Know what `default`, `flatten`, `untagged`, `deny_unknown_fields` actually do.
 - **Protocols and data:** `url`, `bytes`, `tokio_util::codec` for framing, `http`/`hyper`/`reqwest`/`axum`/`tonic`, `jiff` or `chrono` for time. Prefer the existing stack when suitable.
 - **Errors/tests:** [errors](errors.md), [testing](testing.md).
 

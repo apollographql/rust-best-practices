@@ -43,5 +43,4 @@ Local checkout of this guide → read files there. Otherwise fetch `https://raw.
 - Raw input → domain types, flag/optional-field combinations, state transitions, builders, stale checks → `llms/state.md`
 - Rustdoc, comments, `SAFETY:`, config naming → `llms/documentation.md`
 - Shared state, locks, spawn/cancel/shutdown, backpressure, unsafe/FFI → `llms/concurrency.md`
-- Worked perimeter parsing + oracles → `llms/examples/parse-dont-validate/src/main.rs`
 - Design decisions with a human → `llms/collaboration.md`

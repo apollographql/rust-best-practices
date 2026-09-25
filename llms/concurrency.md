@@ -9,7 +9,7 @@
 
 ## Initialization
 
-Ordinary construction first; std `OnceLock`/`LazyLock`/`OnceCell` for deferred/shared init, subject to MSRV and required APIs. Cached derivations require stable inputs or cache invalidation ([example](examples/deferred-init/src/main.rs)); no partially initialized objects.
+Ordinary construction first; std `OnceLock`/`LazyLock`/`OnceCell` for deferred/shared init, subject to MSRV and required APIs. Cached derivations require stable inputs or cache invalidation; no partially initialized objects.
 
 ## Structured concurrency
 
