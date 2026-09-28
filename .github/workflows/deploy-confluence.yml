@@ -12,7 +12,7 @@ jobs:
         uses: actions/checkout@v4
       - name: Install dependencies
         run: |
-            python -m pip install pandas python-dotenv markdown py-gfm atlassian-python-api
+            python -m pip install pandas python-dotenv markdown py-gfm "atlassian-python-api<5"
       - name: Sync with Confluence
         env: 
           PYTHONUNBUFFERED: "1"
