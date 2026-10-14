@@ -241,9 +241,9 @@ Similar to `OnceLock`, but the static value is a bit more complex to initialize.
 ```rust
 use std::sync::LazyLock;
 
-static CONFIG: LazyLock<HashMap<&str, T>> = LazyLock::new(|| {
+static CONFIG: LazyLock<HashMap<&'static str, T>> = LazyLock::new(|| {
     let data = read_config();
-    let mut config: HashMap<&str, T> = data.into();
+    let mut config: HashMap<_, T> = data.into();
     config.insert("special_case", T::default());
     config
 });
