@@ -162,7 +162,7 @@ Inherently **unsafe** and necessary for FFI. Rust makes their usage explicit to 
 
 ```rust
 let x = 5;
-let ptr = &x as *const i32
+let ptr = &x as *const i32;
 unsafe {
     println!("PTR is {}", *ptr)
 }
@@ -241,10 +241,10 @@ Similar to `OnceLock`, but the static value is a bit more complex to initialize.
 ```rust
 use std::sync::LazyLock;
 
-static CONFIG: LazyLock<HashMap<String, T>> = LazyLock::new(|| {
+static CONFIG: LazyLock<HashMap<&'static str, T>> = LazyLock::new(|| {
     let data = read_config();
-    let mut config: HashMap<String, T> = data.into();
-    config.insert("special_case", T::Default());
+    let mut config: HashMap<_, T> = data.into();
+    config.insert("special_case", T::default());
     config
 });
 

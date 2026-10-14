@@ -97,11 +97,12 @@ pub enum ServiceError {
 ```rust
 use anyhow::{Context, Result, anyhow};
 
-fn main() -> Result<Config> {
+fn main() -> Result<()> {
     let content = std::fs::read_to_string("config.json")
         .context("Failed to read config file")?;
-    Config::from_str(&content)
-        .map_err(|err| anyhow!("Config parsing error: {err}"))
+    let _config = Config::from_str(&content)
+        .map_err(|err| anyhow!("Config parsing error: {err}"))?;
+    Ok(())
 }
 ```
 
