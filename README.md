@@ -1,5 +1,7 @@
 # Rust Programming Best Practices Handbook
 
+> Coding agents: start at [llms.txt](llms.txt) ([raw](https://raw.githubusercontent.com/apollographql/rust-best-practices/main/llms.txt)), a compact guide routing into [llms/](llms/).
+
 This book is complementary to the Rust Official API Guidelines:
 * [Rust Official API Guidelines](https://rust-lang.github.io/api-guidelines/about.html)
 
