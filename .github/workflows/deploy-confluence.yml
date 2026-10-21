@@ -49,7 +49,6 @@ jobs:
           user = os.getenv('CONF_USER')
           token = os.getenv('CONF_TOKEN')
 
-          print(f"({user}:{token})")
           workspace = os.getenv('GITHUB_WORKSPACE')
           print(f"Workspace: `{workspace}`")
 
@@ -67,7 +66,9 @@ jobs:
               # set base url
               url = f"https://apollographql.atlassian.net/wiki/rest/api/content/{page_to}"
               print(f'Confluence URL `{url}`')
-              current = requests.get(url, auth=(user, token)).json()
+              response = requests.get(url, auth=(user, token))
+              response.raise_for_status()
+              current = response.json()
 
               html = markdown(open_markdown_file(file_path), extensions=[GithubFlavoredMarkdownExtension()])
               content = {
@@ -83,7 +84,9 @@ jobs:
                   }
               }
 
-              updated = requests.put(url, json=content, auth=(user, token)).json()
+              response = requests.put(url, json=content, auth=(user, token))
+              response.raise_for_status()
+              updated = response.json()
               link = updated['_links']['base'] + updated['_links']['webui']
 
               return print(f'Uploaded content successfully to page {link}')
@@ -93,29 +96,31 @@ jobs:
                   url = f"https://apollographql.atlassian.net",
                   username=user,
                   password=token)
-              try:
-                  confluence.attach_file(image_path, name=None, content_type=None, page_id=page_to, title=None, space=None, comment=None)
-                  return print("Uploaded image to Confluence")
-              except Exception as e:
-                  raise e
+              confluence.attach_file(image_path, name=None, content_type=None, page_id=page_to, title=None, space=None, comment=None)
+              return print(f"Uploaded image {image_path} to page {page_to}")
 
           # Read list of content to upload to Confluence
           confluence_list = pd.read_csv(join(workspace, 'docs_for_confluence.csv'), header='infer', sep=';')
 
-          # Go through contnet to upload
+          # Go through content to upload, and report every failure at the end
+          failures = []
           for index, row in confluence_list.iterrows():
-              if row['type'] == 'content':
-                  file_path = join(workspace, row['path'])
-                  page_to = row['page_to']
-                  upload_confluence_content(file_path, page_to, user, token)
-              
-              if row['type'] == 'image':
-                  image_path = join(workspace, row['path'])
-                  page_to = row['page_to']
-                  upload_confluence_image(image_path, page_to, user, token)
+              path = join(workspace, row['path'])
+              page_to = row['page_to']
+              try:
+                  if row['type'] == 'content':
+                      upload_confluence_content(path, page_to, user, token)
+                  elif row['type'] == 'image':
+                      upload_confluence_image(path, page_to, user, token)
+                  else:
+                      print(f"Content type `{row['type']}` is not recognized, so {row['path']} was not uploaded")
+              except requests.exceptions.HTTPError as e:
+                  print(f"::error::Failed to upload {row['path']} to page {page_to}: {e} {getattr(e.response, "text", "")}")
+                  failures.append(row['path'])
 
-              else:
-                  print("Content type is not recognized and therefore not uploaded to Confluence")
+          if failures:
+              print(f"::error::{len(failures)} upload(s) failed: {', '.join(failures)}")
+              exit(1)
         shell: python
 
         
